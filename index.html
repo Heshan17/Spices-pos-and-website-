@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spices Web & Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f7f4ef;
+  --card:#ffffff;
+  --tx:#201712;
+  --mu:#7a6d62;
+  --ac:#c85217;
+  --ac2:#e57b32;
+  --soft:#fcf0e5;
+  --bd:#e5dcce;
+  --ok:#237836;
+  --bad:#cf1322;
+  --warn:#d48806;
+  --sh:0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(74,42,15,0.08);
+  --sh-lg:0 12px 36px rgba(50,25,8,0.14);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100c;
+    --card:#1f1914;
+    --tx:#f4ebd9;
+    --mu:#a29485;
+    --ac:#e67838;
+    --ac2:#f39c5f;
+    --soft:#332216;
+    --bd:#382d23;
+    --ok:#49aa5c;
+    --bad:#f55a5a;
+    --warn:#fadb14;
+    --sh:0 1px 3px rgba(0,0,0,0.4), 0 10px 28px rgba(0,0,0,0.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100c;
+  --card:#1f1914;
+  --tx:#f4ebd9;
+  --mu:#a29485;
+  --ac:#e67838;
+  --ac2:#f39c5f;
+  --soft:#332216;
+  --bd:#382d23;
+  --ok:#49aa5c;
+  --bad:#f55a5a;
+  --warn:#fadb14;
+  --sh:0 1px 3px rgba(0,0,0,0.4), 0 10px 28px rgba(0,0,0,0.5);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--tx);
+  font:14px/1.5 'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+  letter-spacing:-0.01em;
+}
+button,select,input{font:inherit;color:var(--tx);transition:all .16s ease}
+button{
+  background:var(--ac);
+  color:#fff;
+  border:0;
+  border-radius:10px;
+  padding:9px 15px;
+  cursor:pointer;
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.1);
+}
+button:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 3px 8px rgba(200,82,23,0.25)}
+button:active{transform:translateY(0);filter:brightness(0.96)}
+button:disabled{opacity:.45;pointer-events:none;filter:none;transform:none}
+button.g{background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+button.g:hover{background:var(--soft);border-color:var(--ac2);color:var(--tx);box-shadow:none}
+button.d{background:var(--bad);color:#fff}
+button.d:hover{filter:brightness(1.1);box-shadow:0 3px 8px rgba(207,19,34,0.3)}
+button.on{background:var(--ac);color:#fff}
+input,select{
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:9px 12px;
+  max-width:100%;
+}
+input:focus,select:focus{outline:2px solid var(--ac);outline-offset:1px;border-color:transparent}
+
+.app{display:flex;min-height:100vh}
+aside{
+  width:248px;
+  background:var(--card);
+  border-right:1px solid var(--bd);
+  padding:16px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  flex:none;
+  box-sizing:border-box;
+}
+.logo{
+  font-weight:800;
+  font-size:18px;
+  color:var(--ac);
+  padding:6px 10px 18px;
+  display:flex;
+  gap:9px;
+  align-items:center;
+  letter-spacing:-0.02em;
+}
+.logo span{color:var(--tx)}
+.nv{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:none;
+  color:var(--mu);
+  text-align:left;
+  padding:0 12px;
+  width:100%;
+  height:44px;
+  min-height:44px;
+  max-height:44px;
+  box-sizing:border-box;
+  font-weight:600;
+  font-size:13.5px;
+  border-radius:10px;
+  box-shadow:none;
+  white-space:nowrap;
+  overflow:hidden;
+  transition:all .15s ease;
+}
+.nv:hover{background:var(--soft);color:var(--tx);transform:none;box-shadow:none}
+.nv.on{background:var(--ac);color:#fff;box-shadow:0 4px 12px rgba(200,82,23,0.3)}
+.nv i{
+  width:30px;
+  height:30px;
+  min-width:30px;
+  max-width:30px;
+  border-radius:8px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-style:normal;
+  font-size:16px;
+  background:var(--soft);
+  flex-shrink:0;
+  transition:all .15s ease;
+}
+.nv.on i{background:rgba(255,255,255,0.22)}
+.nv span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp{flex:1}
+
+/* Modern Users & Roles Styles */
+.u-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.u-stat-card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh)}
+.u-stat-ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:var(--soft)}
+.u-stat-val{font-size:22px;font-weight:800;color:var(--tx)}
+.u-stat-lbl{font-size:12px;color:var(--mu);font-weight:600;margin-top:2px}
+.role-cards{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+.role-card{background:var(--soft);border:1px solid var(--bd);border-radius:12px;padding:14px;transition:border-color .15s}
+.role-card.admin{border-color:var(--ac2);background:color-mix(in srgb,var(--card) 92%,var(--ac))}
+.role-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.role-title{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.perm-chips{display:flex;flex-wrap:wrap;gap:6px}
+.p-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--bd);cursor:pointer;user-select:none;transition:all .15s}
+.p-chip input{margin:0;cursor:pointer}
+.p-chip.on{background:color-mix(in srgb,var(--ac) 15%,var(--card));border-color:var(--ac);color:var(--tx)}
+.p-chip.locked{opacity:0.8;cursor:not-allowed}
+.u-table-wrap{overflow-x:auto}
+.u-table{width:100%;border-collapse:collapse}
+.u-table th{text-align:left;padding:10px 12px;font-size:12px;color:var(--mu);border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:0.04em}
+.u-table td{padding:12px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.u-user-cell{display:flex;align-items:center;gap:11px}
+.u-av{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--ac),#e67e22);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;flex-shrink:0}
+
+/* Spice Mixer & Cost Calculator Styles */
+.mx-grid{display:grid;grid-template-columns:1fr 400px;gap:20px}
+@media(max-width:1040px){.mx-grid{grid-template-columns:1fr}}
+.mx-table{width:100%;border-collapse:collapse;margin:12px 0}
+.mx-table th{padding:9px 10px;font-size:12px;color:var(--mu);text-align:left;border-bottom:1px solid var(--bd)}
+.mx-table td{padding:8px 6px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.mx-metric-box{background:var(--soft);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.mx-meter-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed var(--bd)}
+.mx-meter-row:last-child{border-bottom:none}
+.mx-profit-banner{border-radius:12px;padding:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--ok) 18%,var(--card)),color-mix(in srgb,var(--ok) 8%,var(--card)));border:1px solid var(--ok);margin-top:12px}
+.mx-template-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:600;background:var(--soft);border:1px solid var(--bd);cursor:pointer;margin-right:6px;margin-bottom:6px;transition:all .15s}
+.mx-template-btn:hover{background:var(--bd)}
+
+section{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  padding:12px 24px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  position:sticky;
+  top:env(safe-area-inset-top,0px);
+  z-index:6;
+  border-bottom:1px solid var(--bd);
+}
+.top h2{margin:0;font-size:20px;font-weight:700}
+.av{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--ac),var(--ac2));
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-weight:700;
+  box-shadow:0 2px 6px rgba(200,82,23,0.3);
+}
+.bdg{background:var(--bad);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:5px}
+
+main{padding:22px;max-width:1300px;margin:auto;width:100%}
+.card{
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:var(--sh);
+}
+.card h3{margin:0 0 12px;font-size:16px;font-weight:700}
+
+/* Realistic Product Grid & Cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(154px,1fr));gap:14px}
+.pc{
+  cursor:pointer;
+  padding:10px;
+  position:relative;
+  margin:0;
+  text-align:left;
+  border-radius:14px;
+  transition:transform .18s cubic-bezier(.2,0,0,1),box-shadow .18s ease,border-color .18s ease;
+  overflow:hidden;
+  user-select:none;
+}
+.pc:hover{transform:translateY(-4px);box-shadow:var(--sh-lg);border-color:var(--ac2)}
+.pc:active{transform:scale(0.98)}
+.pc-img-wrap{
+  width:100%;
+  aspect-ratio:1;
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+  background:#efe8df;
+  margin-bottom:8px;
+}
+.pc-img-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:transform .3s ease;
+}
+.pc:hover .pc-img-wrap img{transform:scale(1.06)}
+.pc-title{
+  font-weight:700;
+  font-size:13.5px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-bottom:3px;
+}
+.pc-price{
+  color:var(--ac);
+  font-weight:800;
+  font-size:14px;
+}
+.pc-unit{color:var(--mu);font-size:11.5px;font-weight:500}
+.pc.out{opacity:.55;filter:grayscale(0.5);pointer-events:none}
+.tag{
+  position:absolute;
+  top:8px;
+  right:8px;
+  border-radius:99px;
+  padding:2px 8px;
+  font-size:11px;
+  font-weight:700;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  backdrop-filter:blur(6px);
+  z-index:2;
+}
+.tag-ok{background:#237836e6;color:#fff}
+.tag-low{background:#d46b08e6;color:#fff}
+.tag-out{background:#cf1322e6;color:#fff}
+
+/* POS Layout & Cart */
+.pos{display:grid;grid-template-columns:1fr 380px;gap:20px}
+@media(max-width:980px){.pos{grid-template-columns:1fr}}
+.cartc{position:sticky;top:80px;align-self:start}
+.srch{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  padding:0 14px;
+  min-width:200px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03);
+}
+.srch input{border:0;flex:1;outline:0!important;padding:11px 0;background:none}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:6px 0 16px;padding-bottom:4px}
+.chip{
+  background:var(--card);
+  color:var(--mu);
+  border:1px solid var(--bd);
+  border-radius:99px;
+  white-space:nowrap;
+  padding:6px 14px;
+  font-size:13px;
+  font-weight:600;
+}
+.chip:hover{background:var(--soft);color:var(--tx)}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac);box-shadow:0 2px 8px rgba(200,82,23,0.25)}
+
+/* Cart Items */
+.ci{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px dashed var(--bd);
+}
+.ci img{width:46px;height:46px;border-radius:8px;object-fit:cover;flex:none}
+.qt{display:flex;align-items:center;gap:6px}
+.qt button{padding:3px 10px;font-size:14px;border-radius:8px}
+.big{font-size:28px;font-weight:800;color:var(--ac);font-family:'JetBrains Mono',monospace}
+.pays{display:flex;gap:8px;margin:10px 0}
+.pays button{flex:1;padding:10px;font-size:13.5px}
+
+/* Quick Tender Buttons */
+.quick-cash{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 12px}
+.qbtn{padding:7px 4px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+.two{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th{color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+td,th{padding:10px 10px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+tr:hover td{background:var(--soft)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.mu{color:var(--mu);font-size:13px}
+.low{color:var(--bad);font-weight:700}
+.kp{flex:1;min-width:150px}
+.kp b{font-size:26px;display:block;margin-top:2px}
+.up{color:var(--ok)}
+.dn{color:var(--bad)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.bar{height:12px;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:6px}
+
+/* Toast */
+#toast{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom,0px));display:grid;gap:8px;z-index:90}
+#toast div{
+  background:#1a1410;
+  color:#fff;
+  padding:12px 18px;
+  border-radius:12px;
+  max-width:320px;
+  box-shadow:var(--sh-lg);
+  font-weight:600;
+  font-size:13.5px;
+  border-left:4px solid var(--ac);
+  animation:in .25s ease;
+}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+
+/* Modals */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:80;padding:16px;animation:in .2s}
+.modal>div{background:var(--card);padding:24px;border-radius:20px;max-width:460px;width:100%;max-height:92vh;overflow:auto;box-shadow:var(--sh-lg)}
+
+/* Realistic Thermal Receipt */
+.rc-slip{
+  background:#fff !important;
+  color:#111 !important;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  font-size:12.5px;
+  line-height:1.45;
+  padding:24px 20px;
+  border-radius:4px;
+  box-shadow:0 12px 32px rgba(0,0,0,0.28);
+  position:relative;
+  margin:0 auto 16px;
+  border-top:6px solid #2b1f14;
+}
+.rc-cut{
+  height:10px;
+  background-image:radial-gradient(circle, transparent 6px, #fff 7px);
+  background-size:16px 16px;
+  background-position:0 -8px;
+  margin-top:-6px;
+}
+.rc-store-title{font-size:17px;font-weight:800;letter-spacing:1px;text-align:center;margin:0 0 2px}
+.rc-sub{font-size:11.5px;color:#555;text-align:center;line-height:1.35;margin-bottom:12px}
+.rc-divider{border:0;border-bottom:1px dashed #777;margin:10px 0}
+.rc-double{border:0;border-bottom:2px solid #222;margin:10px 0}
+.rc-table{width:100%;font-size:12px}
+.rc-table th{font-size:11px;color:#444;text-align:left;padding:3px 0;border-bottom:1px solid #333}
+.rc-table td{padding:4px 0;border:0;color:#111}
+.rc-totals{margin-top:8px}
+.rc-row{display:flex;justify-content:space-between;padding:2px 0}
+.rc-total-large{font-size:16px;font-weight:800;padding:6px 0;display:flex;justify-content:space-between}
+.rc-barcode{
+  font-family:monospace;
+  letter-spacing:4px;
+  font-size:24px;
+  font-weight:900;
+  text-align:center;
+  margin:14px 0 2px;
+  transform:scaleY(1.3);
+}
+
+/* Realistic Clean Login Screen */
+.login-wrap{
+  max-width:400px;
+  margin:7vh auto 20px;
+  padding:0 12px;
+}
+.login-card{
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:22px;
+  padding:32px 28px;
+  box-shadow:var(--sh-lg);
+  text-align:left;
+}
+.login-logo-box{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  background:var(--soft);
+  font-size:28px;
+  margin-bottom:14px;
+}
+.login-input-group{margin-bottom:14px}
+.login-input-group label{
+  display:block;
+  font-size:12.5px;
+  font-weight:700;
+  color:var(--mu);
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.login-input-group input{
+  width:100%;
+  font-size:15px;
+  padding:11px 14px;
+}
+
+header{display:flex;gap:10px;align-items:center;padding:14px 24px;background:var(--card);border-bottom:1px solid var(--bd)}
+header b{color:var(--ac);font-size:18px}
+nav{flex:1}
+
+@media(max-width:760px){
+  .app{flex-direction:column}
+  aside{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    top:auto;
+    width:auto;
+    height:auto;
+    flex-direction:row;
+    overflow-x:auto;
+    z-index:8;
+    border-top:1px solid var(--bd);
+    border-right:0;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+  }
+  .logo,.sp{display:none}
+  .nv{flex-direction:column;gap:2px;font-size:10px;padding:6px 10px;width:auto;flex:0 0 auto}
+  main{padding:14px 12px 100px}
+  .top{padding:10px 14px}
+}
+@media print{
+  body *{visibility:hidden}
+  #rc-print-area, #rc-print-area *{visibility:visible}
+  #rc-print-area{position:absolute;left:0;top:0;width:320px;color:#000;background:#fff !important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const LKR=n=>'Rs '+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const SRC=['In-store','Facebook','WhatsApp','TikTok','Instagram','Website'];
+const P=['pos','products','analytics','orders','users'];
+const PLABEL={
+  pos:'🛒 POS Billing',
+  products:'📦 Products & Stock',
+  analytics:'📈 Analytics & Reports',
+  orders:'🧾 Orders & History',
+  users:'👥 Users & Security'
+};
+const QS=[
+  'Name of your first school?',
+  'Your childhood nickname?',
+  'Your mother\'s home town?',
+  'Name of your first pet?',
+  'Your favourite teacher?',
+  'Your first phone model?'
+];
+
+// Fallback image generator (used only if local photo fails)
+const img=(e,c)=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="${c}"/><text x="50" y="68" font-size="52" text-anchor="middle">${e}</text></svg>`);
+const cols=['#f7d9b5','#f3c6a5','#d9e8c3','#f6e3a1','#e8cdb3','#f2b8a8'];
+
+// Web Audio API POS Audio feedback
+function beep(freq=1760, duration=0.06, type='sine') {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch(e){}
+}
+function chime() {
+  beep(1046, 0.08);
+  setTimeout(()=>beep(1318, 0.12), 90);
+}
+
+let S=null;
+let me=null, mode='login', tab='pos', cart=[], F={from:'',to:'',src:'',pid:''}, cq='', showLow=false;
+const can=k=>me&&S.roles[me.r]&&S.roles[me.r].includes(k);
+const low=()=>S.products.filter(p=>p.stock<=5);
+
+function toast(m){
+  const d=document.createElement('div');
+  d.textContent=m;
+  $('#toast').appendChild(d);
+  setTimeout(()=>d.remove(),3800);
+}
+
+function modal(h){
+  const m=document.createElement('div');
+  m.className='modal';
+  m.id='mdl';
+  m.innerHTML='<div>'+h+'</div>';
+  m.onclick=e=>{if(e.target==m)m.remove()};
+  document.body.appendChild(m);
+}
+const close=()=>{const m=$('#mdl');m&&m.remove()};
+
+// ===== RENDER =====
+function render(){
+  const a=$('#app');
+  if(mode=='login'){
+    a.innerHTML=`<div class="login-wrap">
+      <div class="login-card">
+        <div style="text-align:center;margin-bottom:20px">
+          <div class="login-logo-box">🌶️</div>
+          <h2 style="margin:0 0 6px;font-size:22px;font-weight:800">Spices Web</h2>
+          <span class="mu" style="font-size:13px">Terminal & Inventory Management</span>
+        </div>
+        <form onsubmit="event.preventDefault();login()">
+          <div class="login-input-group">
+            <label>Username</label>
+            <input id="lu" placeholder="Enter username (e.g. admin)" autocomplete="username" autofocus required>
+          </div>
+          <div class="login-input-group">
+            <label>Password</label>
+            <input id="lp" type="password" placeholder="Enter password" autocomplete="current-password" required>
+          </div>
+          <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+            <button type="submit" style="width:100%;padding:12px;font-size:15px">Sign In to Spices Web</button>
+            <button type="button" class="g" style="width:100%;padding:10px" onclick="forgot()">Forgot Password</button>
+          </div>
+        </form>
+        <div style="margin-top:20px;padding-top:14px;border-top:1px dashed var(--bd);text-align:center" class="mu">
+          <small>Default: <b>admin</b> / <b>admin123</b> &nbsp;|&nbsp; <b>cashier</b> / <b>cash123</b></small>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const tabs=[
+    ['dash','📊','Dashboard','analytics'],
+    ['pos','🛒','POS Billing','pos'],
+    ['products','📦','Products','products'],
+    ['mixer','🧪','Spice Mixer & Costing','products'],
+    ['orders','🧾','Orders','orders'],
+    ['analytics','📈','Analytics','analytics'],
+    ['users','👥','Users & Roles','users']
+  ].filter(t=>!t[3]||can(t[3]));
+  const cur=tabs.find(t=>t[0]==tab)||tabs[0];
+
+  a.innerHTML=`<div class="app">
+    <aside>
+      <div class="logo">🌶️<span>Spices Web</span></div>
+      ${tabs.map(t=>`<button class="nv ${tab==t[0]?'on':''}" onclick="tab='${t[0]}';showLow=false;render()"><i>${t[1]}</i><span>${t[2]}</span></button>`).join('')}
+      <div class="sp"></div>
+      <button class="nv" onclick="prof()"><i>🔐</i><span>Security</span></button>
+      <button class="nv" onclick="logout()"><i>⏻</i><span>Logout</span></button>
+    </aside>
+    <section>
+      <div class="top">
+        <h2>${cur[2]}</h2>
+        <span class="mu">${new Date().toLocaleDateString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric'})}</span>
+        <div style="flex:1"></div>
+        <button class="g" onclick="theme()" title="Toggle Dark/Light Mode">🌓</button>
+        <button class="g" onclick="showLow=!showLow;render()" title="Low stock alert">🔔<span class="bdg">${low().length}</span></button>
+        <div class="av">${me.n[0]}</div>
+        <div><b>${me.n}</b><div class="mu" style="font-size:12px">${me.r}</div></div>
+      </div>
+      <main>
+        ${showLow?`<div class="card" style="border-left:4px solid var(--bad)"><h3>⚠ Low stock warning (5 or fewer units left)</h3>${low().map(p=>`<div class="low" style="padding:3px 0">${p.name}: ${p.stock} ${p.unit} remaining</div>`).join('')||'<div class="mu">All stock levels healthy.</div>'}</div>`:''}
+        ${tab=='dash'?dash():tab=='pos'?pos():tab=='products'?prods():tab=='mixer'?mixer():tab=='orders'?orders():tab=='analytics'?anal():tab=='users'?users():dash()}
+      </main>
+    </section>
+  </div>`;
+}
+
+// User Forgot Password
+function forgot(){
+  modal(`<h3>Reset Password</h3><p class="mu">Enter your registered username to verify your security questions.</p><input id="fu" placeholder="Username" style="width:100%"><div class="row" style="margin-top:12px"><button onclick="fq()">Next</button></div>`);
+}
+async function fq(){
+  const u=$('#fu').value.trim();
+  const j=await api('sq_get',{u});
+  if(!j)return;
+  $('#mdl>div').innerHTML=`<h3>Answer Your Security Questions</h3>
+    ${j.q.map((q,i)=>`<p><b>${QS[q]}</b><br><input id="a${i}" style="width:100%;margin-top:4px"></p>`).join('')}
+    <div style="margin-top:10px">
+      <label class="mu" style="font-weight:600">New Password (min 6 characters)</label>
+      <input id="np" type="password" placeholder="New password" style="width:100%;margin-top:4px">
+    </div>
+    <div class="row" style="margin-top:14px"><button onclick="fr('${encodeURIComponent(u)}')">Reset Password</button></div>`;
+}
+async function fr(u){
+  if(await api('reset',{u:decodeURIComponent(u),a:[0,1,2].map(i=>$('#a'+i).value),np:$('#np').value})){
+    close();
+    toast('Password reset successfully. You can now sign in.');
+  }
+}
+
+// Profile & Security Questions
+function prof(){
+  modal(`<h3>My Security Questions</h3><p class="mu">Used to recover account if password is forgotten. Answers are securely hashed.</p>
+  ${[0,1,2].map(i=>`<p><select id="sq${i}">${QS.map((q,j)=>`<option value="${j}" ${i==j?'selected':''}>${q}</option>`).join('')}</select><input id="sa${i}" placeholder="Your answer" style="width:100%;margin-top:4px"></p>`).join('')}
+  <div class="row"><button onclick="sp()">Save Questions</button></div>
+  <hr style="border:0;border-bottom:1px solid var(--bd);margin:16px 0">
+  <h3>Change Password</h3>
+  <input id="cpw" type="password" placeholder="Current password" style="width:100%">
+  <input id="np3" type="password" placeholder="New password (min 6)" style="width:100%;margin-top:6px">
+  <div class="row" style="margin-top:10px"><button onclick="pwc()">Update Password</button></div>`);
+}
+async function sp(){
+  const q=[0,1,2].map(i=>[+$('#sq'+i).value,$('#sa'+i).value.trim()]);
+  if(new Set(q.map(x=>x[0])).size<3||q.some(x=>!x[1]))return toast('Pick 3 different questions and answer all');
+  if(await api('sq_set',{q})){close();toast('Security questions saved');}
+}
+async function pwc(){
+  if(await api('pw_change',{op:$('#cpw').value,np:$('#np3').value})){close();toast('Password updated');}
+}
+
+// POS Categories & Filter
+const CATS=['All','Powders','Seeds','Whole spices','Leaves & herbs','Other'];
+const catOf=p=>p.cat||(/powder/i.test(p.name)?'Powders':/seed|fenugreek/i.test(p.name)?'Seeds':/leaf|leaves|lemongrass|pandan/i.test(p.name)?'Leaves & herbs':/cinnamon|clove|cardamom|pepper|nutmeg|mace|anise|ginger|vanilla|saffron|goraka|tamarind/i.test(p.name)?'Whole spices':'Other');
+let cat='All', pay='Cash', disc=0, tend=0;
+const CL=['#c85217','#1877f2','#25d366','#111111','#e1306c','#8d6e63'];
+
+function theme(){
+  const d=document.documentElement;
+  const n=(d.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))=='dark'?'light':'dark';
+  d.dataset.theme=n;
+  try{localStorage.setItem('th',n)}catch(e){}
+}
+try{const t=localStorage.getItem('th');t&&(document.documentElement.dataset.theme=t)}catch(e){}
+
+const vis=()=>S.products.filter(p=>(cat=='All'||catOf(p)==cat)&&(!cq||p.name.toLowerCase().includes(cq.toLowerCase())||p.code.toLowerCase()==cq.toLowerCase()));
+
+// Realistic Product Card Generator
+const gridH=ps=>ps.map(p=>{
+  const isOut=p.stock<1;
+  const isLow=p.stock<=5;
+  const tagClass=isOut?'tag-out':(isLow?'tag-low':'tag-ok');
+  const tagText=isOut?'Out of Stock':(isLow?`Low: ${p.stock} ${p.unit}`:`${p.stock} ${p.unit}`);
+  const fallbackSvg=img(p.emoji||'🌿',p.color||'#e3ecd0');
+  return `<div class="card pc ${isOut?'out':''}" onclick="add(${p.id})">
+    <div class="tag ${tagClass}">${tagText}</div>
+    <div class="pc-img-wrap">
+      <img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackSvg}'">
+    </div>
+    <div class="pc-title" title="${p.name}"><b>${p.name}</b></div>
+    <div class="pc-price">${LKR(p.price)} <span class="pc-unit">/${p.unit}</span></div>
+  </div>`;
+}).join('')||'<div class="card" style="grid-column:1/-1;text-align:center;padding:32px"><p class="mu">No matching spice products found.</p></div>';
+
+function gridUp(){$('#grid').innerHTML=gridH(vis())}
+const pr=id=>S.products.find(p=>p.id==id);
+
+function addCode(c){
+  const p=S.products.find(p=>p.code.toLowerCase()==c.trim().toLowerCase());
+  cq='';
+  if(p){
+    add(p.id);
+  } else {
+    toast('No product with code '+c);
+  }
+}
+
+function add(id){
+  const p=pr(id);
+  const c=cart.find(c=>c.id==id);
+  if((c?c.q:0)+1>p.stock)return toast('Only '+p.stock+' in stock');
+  c?c.q++:cart.push({id,q:1});
+  beep(1760, 0.05); // Realistic POS laser beep
+  render();
+}
+
+function qty(id,d){
+  const c=cart.find(c=>c.id==id);
+  if(d>0)return add(id);
+  c.q--;
+  if(c.q<1)cart=cart.filter(x=>x!=c);
+  beep(1200, 0.04);
+  render();
+}
+
+// POS Screen
+function pos(){
+  const sub=cart.reduce((a,c)=>a+c.q*pr(c.id).price,0);
+  const tot=Math.max(0,sub-disc);
+  const chg=pay=='Cash'&&tend>=tot&&tend>0?tend-tot:0;
+
+  return `<div class="pos">
+    <div>
+      <div class="row">
+        <div class="srch">
+          <span style="font-size:16px">🔍</span>
+          <input id="sc" placeholder="Scan QR barcode or search spices (F2)" value="${cq}" onkeydown="if(event.key=='Enter'){addCode(this.value)}" oninput="cq=this.value;gridUp()">
+        </div>
+        <button onclick="cam()">📷 Scan Camera</button>
+      </div>
+      <div class="chips">
+        ${CATS.map(c=>`<button class="chip ${cat==c?'on':''}" onclick="cat='${c}';render()">${c}</button>`).join('')}
+      </div>
+      <div class="grid" id="grid">${gridH(vis())}</div>
+    </div>
+
+    <div class="card cartc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3 style="margin:0">🛒 Register (${cart.reduce((a,c)=>a+c.q,0)})</h3>
+        ${cart.length?`<button class="g" style="padding:3px 8px;font-size:12px" onclick="cart=[];disc=0;tend=0;render()">Clear</button>`:''}
+      </div>
+
+      <div style="max-height:240px;overflow-y:auto;padding-right:4px">
+        ${cart.map(c=>{
+          const p=pr(c.id);
+          const fallbackSvg=img(p.emoji||'🌿',p.color||'#e3ecd0');
+          return `<div class="ci">
+            <img src="${p.img}" alt="" onerror="this.onerror=null;this.src='${fallbackSvg}'">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+              <div class="mu" style="font-size:12px">${LKR(p.price)} × ${c.q} = <b>${LKR(p.price*c.q)}</b></div>
+            </div>
+            <div class="qt">
+              <button class="g" onclick="qty(${c.id},-1)">−</button>
+              <b style="min-width:18px;text-align:center">${c.q}</b>
+              <button class="g" onclick="qty(${c.id},1)">+</button>
+            </div>
+          </div>`;
+        }).join('')||'<p class="mu" style="text-align:center;padding:24px 0">Cart is empty. Tap any spice or scan code to add.</p>'}
+      </div>
+
+      <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--bd)">
+        <div class="row" style="margin-bottom:6px">
+          <span style="flex:1" class="mu">Subtotal</span>
+          <span>${LKR(sub)}</span>
+        </div>
+        <div class="row" style="margin-bottom:6px">
+          <span style="flex:1" class="mu">Discount (Rs)</span>
+          <input type="number" min="0" style="width:96px;padding:5px 8px;text-align:right" value="${disc||''}" onchange="disc=Math.max(0,+this.value||0);render()">
+        </div>
+        <div class="row" style="margin-bottom:10px">
+          <span style="flex:1;font-weight:800;font-size:16px">Net Payable</span>
+          <span class="big">${LKR(tot)}</span>
+        </div>
+
+        <div class="pays">
+          ${['Cash','Card','Online'].map(m=>`<button class="${pay==m?'on':'g'}" onclick="pay='${m}';render()">${m}</button>`).join('')}
+        </div>
+
+        ${pay=='Cash'?`
+          <div class="quick-cash">
+            <button type="button" class="g qbtn" onclick="tend=${tot};render()">Exact</button>
+            <button type="button" class="g qbtn" onclick="tend=Math.ceil(${tot}/500)*500||500;render()">Rs ${Math.ceil(tot/500)*500||500}</button>
+            <button type="button" class="g qbtn" onclick="tend=Math.ceil(${tot}/1000)*1000||1000;render()">Rs ${Math.ceil(tot/1000)*1000||1000}</button>
+            <button type="button" class="g qbtn" onclick="tend=Math.ceil(${tot}/5000)*5000||5000;render()">Rs ${Math.ceil(tot/5000)*5000||5000}</button>
+          </div>
+          <div class="row" style="margin-bottom:6px">
+            <span style="flex:1" class="mu">Cash Received</span>
+            <input type="number" min="0" style="width:120px;text-align:right" value="${tend||''}" oninput="tend=+this.value||0;render()">
+          </div>
+          <div class="row" style="margin-bottom:10px">
+            <span style="flex:1;font-weight:600">Change Due</span>
+            <b class="up" style="font-size:16px;font-family:'JetBrains Mono',monospace">${LKR(chg)}</b>
+          </div>
+        `:''}
+
+        <div class="row" style="margin-bottom:10px">
+          <select id="csrc" style="flex:1">${SRC.map(s=>`<option>${s}</option>`).join('')}</select>
+          <input id="ccu" placeholder="Customer name / phone (opt)" style="flex:1;min-width:0">
+        </div>
+
+        <button style="width:100%;padding:13px;font-size:16px;border-radius:12px" onclick="checkout()" ${cart.length?'':'disabled'}>
+          Pay & Complete ${LKR(tot)} (F9)
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Camera scanner
+async function cam(){
+  if(!('BarcodeDetector' in window))return toast('Camera QR not supported in this browser. Use a barcode scanner gun or keyboard input.');
+  modal('<video id="vd" style="width:100%;border-radius:12px" playsinline></video><div class="row" style="margin-top:12px"><button class="g" onclick="stopCam()">Close Camera</button></div>');
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=$('#vd');
+    v.srcObject=st;
+    v.play();
+    window._st=st;
+    const d=new BarcodeDetector({formats:['qr_code','code_128','ean_13']});
+    window._lp=setInterval(async()=>{
+      try{
+        const r=await d.detect(v);
+        if(r.length){
+          addCode(r[0].rawValue);
+          beep(2200, 0.08);
+          toast('Scanned: '+r[0].rawValue);
+        }
+      }catch(e){}
+    },700);
+  }catch(e){
+    toast('Camera unavailable or permission denied');
+    close();
+  }
+}
+function stopCam(){
+  clearInterval(window._lp);
+  window._st&&window._st.getTracks().forEach(t=>t.stop());
+  close();
+}
+
+// Products tab
+function prods(){
+  return `<div class="card">
+    <b>Add New Spice Product</b>
+    <div class="row" style="margin-top:10px">
+      <input id="pn" placeholder="Spice Name" style="flex:2;min-width:140px">
+      <input id="pp" type="number" placeholder="Price (Rs)" style="width:100px">
+      <input id="ps" type="number" placeholder="Stock" style="width:80px">
+      <input id="pu" placeholder="Unit (100g)" style="width:100px">
+      <input id="pi" type="file" accept="image/*" style="width:200px">
+      <button onclick="addP()">Add Spice</button>
+    </div>
+  </div>
+  <div class="card tw">
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th><th>Code</th><th>Name</th><th>Price</th><th>Stock Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${S.products.map(p=>`<tr>
+          <td><img src="${p.img}" width="42" height="42" style="border-radius:8px;object-fit:cover" onerror="this.onerror=null;this.src='${img(p.emoji||'🌿',p.color||'#e3ecd0')}'"></td>
+          <td><b>${p.code}</b></td>
+          <td>${p.name}</td>
+          <td>${LKR(p.price)} / ${p.unit}</td>
+          <td><span class="tag ${p.stock<=0?'tag-out':(p.stock<=5?'tag-low':'tag-ok')}" style="position:static">${p.stock<=0?'Out of Stock':p.stock+' '+p.unit}</span></td>
+          <td>
+            <button class="g" style="padding:4px 9px;font-size:12px" onclick="restock(${p.id})">+ Stock</button>
+            <button class="g" style="padding:4px 9px;font-size:12px" onclick="qr(${p.id})">QR</button>
+            <button class="d" style="padding:4px 9px;font-size:12px" onclick="delP(${p.id})">✕</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function restock(id){
+  const n=+prompt('Add how many units to stock?');
+  if(n>0)act('product_stock',{id,add:n});
+}
+function delP(id){
+  if(confirm('Delete product?'))act('product_del',{id});
+}
+function qr(id){
+  const p=pr(id);
+  modal(`<div style="text-align:center">
+    <h3 style="margin:0 0 10px">${p.name}</h3>
+    <div id="qrb" style="display:flex;justify-content:center;margin:14px 0"></div>
+    <p class="mu">Barcode: <b>${p.code}</b></p>
+    <button onclick="window.print()">Print Label</button>
+  </div>`);
+  try{new QRCode($('#qrb'),{text:p.code,width:180,height:180})}catch(e){$('#qrb').textContent='QR code unavailable';}
+}
+
+// Orders & Analytics filter
+const fs=()=>S.sales.filter(s=>(!F.src||s.src==F.src)&&(!F.from||s.t>=new Date(F.from).getTime())&&(!F.to||s.t<=new Date(F.to).getTime()+864e5)&&(!F.pid||s.items.some(i=>i.id==F.pid)));
+
+function flt(){
+  return `<div class="row">
+    <input type="date" value="${F.from}" onchange="F.from=this.value;render()">
+    <input type="date" value="${F.to}" onchange="F.to=this.value;render()">
+    <select onchange="F.src=this.value;render()">
+      <option value="">All Channels</option>
+      ${SRC.map(s=>`<option ${F.src==s?'selected':''}>${s}</option>`).join('')}
+    </select>
+    <select onchange="F.pid=this.value;render()">
+      <option value="">All Products</option>
+      ${S.products.map(p=>`<option value="${p.id}" ${F.pid==p.id?'selected':''}>${p.name}</option>`).join('')}
+    </select>
+    <button class="g" onclick="F={from:'',to:'',src:'',pid:''};render()">Reset Filters</button>
+  </div>`;
+}
+
+function orders(){
+  const l=fs();
+  return `<div class="card">
+    ${flt()}
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Order #</th><th>Date & Time</th><th>Channel</th><th>Customer</th><th>Items Purchased</th><th>Total</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${l.slice(0,100).map(s=>`<tr>
+            <td><b>#${s.id}</b></td>
+            <td class="mu">${new Date(s.t).toLocaleString()}</td>
+            <td><span class="tag" style="position:static;background:var(--soft);color:var(--tx)">${s.src}</span></td>
+            <td>${s.cust||'-'}</td>
+            <td>${s.items.map(i=>i.name+' × '+i.q).join(', ')}</td>
+            <td><b>${LKR(s.total)}</b></td>
+            <td><button class="${s.st=='done'?'g':''}" style="padding:4px 10px;font-size:12px" onclick="tg(${s.id})">${s.st}</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function tg(id){act('sale_status',{id});}
+
+function anal(){
+  const l=fs(), rev=l.reduce((a,s)=>a+s.total,0), bp={}, bs={}, bd={};
+  l.forEach(s=>{
+    bs[s.src]=(bs[s.src]||0)+s.total;
+    const d=new Date(s.t).toISOString().slice(0,10);
+    bd[d]=(bd[d]||0)+s.total;
+    s.items.forEach(i=>{
+      const o=bp[i.name]||(bp[i.name]={q:0,r:0});
+      o.q+=i.q;
+      o.r+=i.q*i.price;
+    });
+  });
+  const days=Object.keys(bd).sort().slice(-14);
+  const mx=Math.max(1,...days.map(d=>bd[d]));
+  const tp=Object.entries(bp).sort((a,b)=>b[1].r-a[1].r);
+
+  return `<div class="card">
+    ${flt()}
+    <button onclick="csv()">⬇ Export CSV Report</button>
+  </div>
+  <div class="row">
+    <div class="card kp"><span class="mu">Total Revenue</span><b>${LKR(rev)}</b></div>
+    <div class="card kp"><span class="mu">Total Orders</span><b>${l.length}</b></div>
+    <div class="card kp"><span class="mu">Average Order</span><b>${LKR(l.length?rev/l.length:0)}</b></div>
+    <div class="card kp"><span class="mu">Total Units Sold</span><b>${tp.reduce((a,x)=>a+x[1].q,0)}</b></div>
+  </div>
+  <div class="card">
+    <h3>Sales Trend (Last 14 Days)</h3>
+    ${days.map(d=>`<div class="row" style="margin:4px 0">
+      <span class="mu" style="width:85px;font-family:'JetBrains Mono',monospace">${d.slice(5)}</span>
+      <div class="bar" style="width:${bd[d]/mx*60}%;min-width:6px"></div>
+      <b style="font-family:'JetBrains Mono',monospace">${LKR(bd[d])}</b>
+    </div>`).join('')||'<p class="mu">No sales data recorded yet.</p>'}
+  </div>
+  <div class="two">
+    <div class="card tw">
+      <h3>Top Selling Spices</h3>
+      <table>
+        ${tp.slice(0,10).map(x=>`<tr><td>${x[0]}</td><td><b>${x[1].q} units</b></td><td>${LKR(x[1].r)}</td></tr>`).join('')}
+      </table>
+    </div>
+    <div class="card">
+      <h3>Sales by Channel</h3>
+      ${Object.entries(bs).map(x=>`<div class="row" style="margin:6px 0"><span style="flex:1">${x[0]}</span><b>${LKR(x[1])}</b></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function csv(){
+  const r=[['Order','Date','Channel','Customer','Product','Qty','Unit price','Line total','Staff']];
+  fs().forEach(s=>s.items.forEach(i=>r.push([s.id,new Date(s.t).toISOString(),s.src,s.cust||'',i.name,i.q,i.price,i.q*i.price,s.by])));
+  const b=new Blob([r.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='spice-sales-report.csv';
+  a.click();
+}
+
+// Users & Roles
+function users(){
+  const roleList = Object.entries(S.roles);
+  const totalStaff = S.users.length;
+  const adminCount = S.users.filter(u=>u.r==='Admin').length;
+
+  return `
+  <!-- Executive KPI summary -->
+  <div class="u-stat-grid">
+    <div class="u-stat-card">
+      <div class="u-stat-ico" style="background:#e8f4fd;color:#1890ff">👥</div>
+      <div>
+        <div class="u-stat-val">${totalStaff}</div>
+        <div class="u-stat-lbl">Active Staff Members</div>
+      </div>
+    </div>
+    <div class="u-stat-card">
+      <div class="u-stat-ico" style="background:#f6ffed;color:#52c41a">🛡️</div>
+      <div>
+        <div class="u-stat-val">${roleList.length}</div>
+        <div class="u-stat-lbl">Configured Roles</div>
+      </div>
+    </div>
+    <div class="u-stat-card">
+      <div class="u-stat-ico" style="background:#fff7e6;color:#fa8c16">👑</div>
+      <div>
+        <div class="u-stat-val">${adminCount}</div>
+        <div class="u-stat-lbl">System Administrators</div>
+      </div>
+    </div>
+    <div class="u-stat-card">
+      <div class="u-stat-ico" style="background:#f9f0ff;color:#722ed1">🔐</div>
+      <div>
+        <div class="u-stat-val">Protected</div>
+        <div class="u-stat-lbl">Access Control Guard</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two" style="align-items:start">
+    <!-- Left Column: Staff Accounts Directory -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <h3 style="margin:0">👥 Staff Accounts Directory</h3>
+          <span class="mu" style="font-size:12px">Manage internal shop personnel and cashier access</span>
+        </div>
+      </div>
+
+      <div class="u-table-wrap">
+        <table class="u-table">
+          <thead>
+            <tr>
+              <th>Staff User</th>
+              <th>Assigned Role</th>
+              <th style="text-align:right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${S.users.map(u=>{
+              const initials = (u.n||u.u).split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+              const isAdmin = u.u === 'admin';
+              return `<tr>
+                <td>
+                  <div class="u-user-cell">
+                    <div class="u-av" style="${isAdmin?'background:linear-gradient(135deg,#c85217,#d35400)':''}">${initials}</div>
+                    <div>
+                      <div style="font-weight:700">${u.n||u.u} ${isAdmin?'<span class="bdg" style="background:var(--ac);font-size:10px">Admin</span>':''}</div>
+                      <div class="mu" style="font-size:12px">@${u.u}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <select style="padding:6px 10px;font-size:13px;border-radius:8px;font-weight:600" onchange="setR('${u.u}',this.value)" ${isAdmin?'disabled':''}>
+                    ${Object.keys(S.roles).map(r=>`<option ${u.r===r?'selected':''}>${r}</option>`).join('')}
+                  </select>
+                </td>
+                <td style="text-align:right">
+                  ${isAdmin ? '<span class="mu" style="font-size:11.5px">Protected</span>' : `
+                    <button class="d" style="padding:5px 10px;font-size:12px;border-radius:8px" onclick="delU('${u.u}')" title="Delete account">🗑️ Remove</button>
+                  `}
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add New User Sub-Card -->
+      <div style="margin-top:20px;padding:16px;background:var(--soft);border-radius:12px;border:1px solid var(--bd)">
+        <h4 style="margin:0 0 10px;font-size:14px">➕ Add New Staff Account</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <input id="nu" placeholder="Username (e.g. cashier2)" style="background:var(--card)">
+          <input id="nn" placeholder="Full Name (e.g. Sunil Perera)" style="background:var(--card)">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <input id="np2" type="password" placeholder="Password (min 6 chars)" style="background:var(--card)">
+          <select id="nrr" style="background:var(--card)">
+            ${Object.keys(S.roles).map(r=>`<option>${r}</option>`).join('')}
+          </select>
+        </div>
+        <button style="width:100%;padding:10px" onclick="addU()">Create Staff Account</button>
+      </div>
+    </div>
+
+    <!-- Right Column: Role Permissions Matrix -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <h3 style="margin:0">🛡️ Role Permissions Matrix</h3>
+          <span class="mu" style="font-size:12px">Configure access rights for each position</span>
+        </div>
+      </div>
+
+      <div class="role-cards">
+        ${roleList.map(([r,pm])=>{
+          const isAdmin = r === 'Admin';
+          const rIcon = r === 'Admin' ? '👑' : r === 'Cashier' ? '🛒' : r === 'Stock Manager' ? '📦' : '🛡️';
+          return `<div class="role-card ${isAdmin?'admin':''}">
+            <div class="role-h">
+              <div class="role-title">
+                <span style="font-size:18px">${rIcon}</span>
+                <span>${r}</span>
+              </div>
+              <span class="mu" style="font-size:11.5px">${isAdmin ? 'Immutable Root' : pm.length + ' permissions'}</span>
+            </div>
+            <div class="perm-chips">
+              ${P.map(k=>{
+                const has = pm.includes(k);
+                const label = PLABEL[k] || k;
+                return `<label class="p-chip ${has?'on':''} ${isAdmin?'locked':''}">
+                  <input type="checkbox" ${has?'checked':''} ${isAdmin?'disabled':''} onchange="perm('${r}','${k}',this.checked)">
+                  <span>${label}</span>
+                </label>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- Add New Role Section -->
+      <div style="margin-top:20px;padding:16px;background:var(--soft);border-radius:12px;border:1px solid var(--bd)">
+        <h4 style="margin:0 0 10px;font-size:14px">✨ Define Custom Role</h4>
+        <div class="row">
+          <input id="nr" placeholder="Enter role title (e.g. Accountant, Shift Supervisor)" style="flex:1;background:var(--card)">
+          <button onclick="addR()">Add Role</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function perm(r,k,v){act('role_perm',{role:r,perm:k,on:v});}
+function addR(){const n=$('#nr').value.trim();n&&act('role_add',{name:n});}
+function setR(u,r){act('user_role',{u,r});}
+function delU(u){confirm('Delete user '+u+'?')&&act('user_del',{u});}
+function addU(){act('user_add',{u:$('#nu').value.trim(),n:$('#nn').value,p:$('#np2').value,r:$('#nrr').value});}
+
+// Spice Mixer & Recipe Cost Calculator
+let mix = {
+  name: 'Special Roasted Curry Powder 500g',
+  packUnit: '100g',
+  packCost: 15,
+  laborCost: 20,
+  marginPct: 40,
+  customPrice: 0,
+  items: [
+    { name: 'Coriander Powder', qty: 200, unitPrice: 300 },
+    { name: 'Cumin Seeds', qty: 100, unitPrice: 520 },
+    { name: 'Fennel Seeds', qty: 80, unitPrice: 380 },
+    { name: 'Cinnamon (Ceylon)', qty: 40, unitPrice: 950 }
+  ]
+};
+
+const MIX_TEMPLATES = [
+  {
+    name: 'Traditional Raw Curry Powder (අමු තුනපහ)',
+    packUnit: '100g', packCost: 12, laborCost: 15, marginPct: 40,
+    items: [
+      { name: 'Coriander Powder', qty: 250, unitPrice: 300 },
+      { name: 'Cumin Seeds', qty: 100, unitPrice: 520 },
+      { name: 'Fennel Seeds', qty: 80, unitPrice: 380 },
+      { name: 'Turmeric Powder', qty: 50, unitPrice: 350 },
+      { name: 'Curry Leaves', qty: 30, unitPrice: 100 }
+    ]
+  },
+  {
+    name: 'Special Roasted Curry Powder (බැදපු තුනපහ)',
+    packUnit: '100g', packCost: 15, laborCost: 25, marginPct: 45,
+    items: [
+      { name: 'Coriander Powder', qty: 200, unitPrice: 300 },
+      { name: 'Cumin Seeds', qty: 100, unitPrice: 520 },
+      { name: 'Fennel Seeds', qty: 60, unitPrice: 380 },
+      { name: 'Chilli Flakes', qty: 60, unitPrice: 480 },
+      { name: 'Cardamom', qty: 20, unitPrice: 2400 },
+      { name: 'Cinnamon (Ceylon)', qty: 30, unitPrice: 950 },
+      { name: 'Cloves', qty: 20, unitPrice: 1200 }
+    ]
+  },
+  {
+    name: 'Spicy Chilli & Pepper Seasoning',
+    packUnit: '100g', packCost: 10, laborCost: 15, marginPct: 35,
+    items: [
+      { name: 'Chilli Powder', qty: 250, unitPrice: 420 },
+      { name: 'Black Pepper', qty: 150, unitPrice: 700 },
+      { name: 'Garlic Powder', qty: 50, unitPrice: 550 },
+      { name: 'Sea Salt', qty: 50, unitPrice: 120 }
+    ]
+  },
+  {
+    name: 'Ceylon Royal Chai Masala Blend',
+    packUnit: '50g', packCost: 20, laborCost: 30, marginPct: 50,
+    items: [
+      { name: 'Cardamom', qty: 80, unitPrice: 2400 },
+      { name: 'Cinnamon (Ceylon)', qty: 80, unitPrice: 950 },
+      { name: 'Dry Ginger', qty: 60, unitPrice: 650 },
+      { name: 'Cloves', qty: 40, unitPrice: 1200 },
+      { name: 'Star Anise', qty: 20, unitPrice: 1100 }
+    ]
+  }
+];
+
+function loadMixTemplate(idx){
+  const t = MIX_TEMPLATES[idx];
+  if(!t) return;
+  mix = JSON.parse(JSON.stringify(t));
+  mix.customPrice = 0;
+  render();
+  toast('Loaded formula template: ' + t.name);
+}
+
+function addMixItem(){
+  const first = S.products[0] || { name: 'Raw Spice', price: 400 };
+  mix.items.push({ name: first.name, qty: 50, unitPrice: first.price });
+  render();
+}
+
+function delMixItem(idx){
+  if(mix.items.length <= 1) return toast('Recipe must have at least one spice ingredient');
+  mix.items.splice(idx, 1);
+  render();
+}
+
+function updateMixSpice(idx, pName){
+  const p = S.products.find(x => x.name === pName);
+  mix.items[idx].name = pName;
+  if(p) mix.items[idx].unitPrice = p.price;
+  render();
+}
+
+async function saveBlend(){
+  const tw = mix.items.reduce((a,c)=>a + (+c.qty||0), 0);
+  if(tw <= 0) return toast('Please specify ingredient quantities');
+  const raw = mix.items.reduce((a,c)=>a + ((+c.qty||0)/100) * (+c.unitPrice||0), 0);
+  const tc = raw + (+mix.packCost||0) + (+mix.laborCost||0);
+  const packG = parseInt(mix.packUnit) || 100;
+  const cpu = tw > 0 ? (tc / tw) * packG : 0;
+  const sp = mix.customPrice > 0 ? mix.customPrice : cpu * (1 + (mix.marginPct||0)/100);
+  const pa = Math.max(0, sp - cpu);
+  const mp = cpu > 0 ? (pa / cpu) * 100 : 0;
+
+  const res = await act('blend_save', {
+    name: mix.name.trim() || 'Custom Spice Blend',
+    total_weight_g: tw,
+    pack_unit: mix.packUnit,
+    total_cost: tc,
+    cost_per_unit: cpu,
+    selling_price: sp,
+    profit_amount: pa,
+    margin_pct: mp,
+    ingredients: mix.items
+  });
+  if(res) toast('✓ Recipe formulation saved to database!');
+}
+
+async function addBlendToProducts(){
+  const tw = mix.items.reduce((a,c)=>a + (+c.qty||0), 0);
+  if(tw <= 0) return toast('Please specify ingredient quantities');
+  const raw = mix.items.reduce((a,c)=>a + ((+c.qty||0)/100) * (+c.unitPrice||0), 0);
+  const tc = raw + (+mix.packCost||0) + (+mix.laborCost||0);
+  const packG = parseInt(mix.packUnit) || 100;
+  const cpu = tw > 0 ? (tc / tw) * packG : 0;
+  const sp = Math.round(mix.customPrice > 0 ? mix.customPrice : cpu * (1 + (mix.marginPct||0)/100));
+  const estStock = Math.max(1, Math.floor(tw / packG));
+
+  const res = await act('product_add', {
+    name: mix.name.trim() || 'Custom Spice Blend',
+    price: sp,
+    unit: mix.packUnit,
+    stock: estStock,
+    image: null
+  });
+  if(res){
+    toast('✓ ' + mix.name + ' added to Products inventory at ' + LKR(sp) + ' (' + estStock + ' packs)!');
+  }
+}
+
+function loadSavedBlend(b){
+  mix = {
+    name: b.name,
+    packUnit: b.pack_unit || '100g',
+    packCost: 15,
+    laborCost: 20,
+    marginPct: b.margin_pct || 40,
+    customPrice: b.selling_price || 0,
+    items: Array.isArray(b.ingredients) && b.ingredients.length ? JSON.parse(JSON.stringify(b.ingredients)) : [
+      { name: 'Coriander Powder', qty: 100, unitPrice: 300 }
+    ]
+  };
+  render();
+  toast('Loaded formulation: ' + b.name);
+}
+
+function mixer(){
+  const totG = mix.items.reduce((a,c)=>a + (+c.qty||0), 0);
+  const rawCost = mix.items.reduce((a,c)=>a + ((+c.qty||0)/100) * (+c.unitPrice||0), 0);
+  const totalCost = rawCost + (+mix.packCost||0) + (+mix.laborCost||0);
+  const packG = parseInt(mix.packUnit) || 100;
+  const packCount = totG > 0 ? (totG / packG) : 0;
+  const costPerPack = packCount > 0 ? (totalCost / packCount) : 0;
+  const costPer100g = totG > 0 ? (totalCost / totG) * 100 : 0;
+
+  const sellingPrice = mix.customPrice > 0 ? mix.customPrice : Math.round(costPerPack * (1 + (mix.marginPct||0)/100));
+  const profitPerPack = Math.max(0, sellingPrice - costPerPack);
+  const totalBatchRevenue = packCount * sellingPrice;
+  const totalBatchProfit = Math.max(0, totalBatchRevenue - totalCost);
+  const realMargin = costPerPack > 0 ? ((profitPerPack / costPerPack) * 100).toFixed(1) : 0;
+
+  const saved = S.blends || [];
+
+  return `
+  <!-- Header & Preset Templates -->
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+      <div>
+        <h3 style="margin:0 0 4px">🧪 Spice Blending & Production Cost Calculator</h3>
+        <span class="mu" style="font-size:13px">Combine individual spices, calculate raw goods costs, batch weights, packaging overhead, selling price, and view exact profits!</span>
+      </div>
+      <div>
+        <button class="g" onclick="mix.items=[];addMixItem();render()">Reset Form</button>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--bd)">
+      <span class="mu" style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">⚡ QUICK RECIPE FORMULATION TEMPLATES:</span>
+      ${MIX_TEMPLATES.map((t,i)=>`<button type="button" class="mx-template-btn" onclick="loadMixTemplate(${i})">✨ ${t.name}</button>`).join('')}
+    </div>
+  </div>
+
+  <div class="mx-grid">
+    <!-- Left Column: Formulation & Ingredients List -->
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="flex:2;min-width:200px">
+          <label style="font-size:12px;font-weight:700;color:var(--mu);display:block;margin-bottom:4px">Recipe / Mixture Name</label>
+          <input id="mx-name" value="${mix.name}" style="width:100%;font-weight:700;font-size:14px" oninput="mix.name=this.value" placeholder="e.g. Special Roasted Curry Powder 500g">
+        </div>
+        <div style="width:120px">
+          <label style="font-size:12px;font-weight:700;color:var(--mu);display:block;margin-bottom:4px">Packet Unit</label>
+          <select style="width:100%;padding:8px" onchange="mix.packUnit=this.value;render()">
+            ${['50g','100g','200g','250g','500g','1kg'].map(u=>`<option ${mix.packUnit===u?'selected':''}>${u}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 6px">
+        <b>🌿 Ingredients & Weight Breakdown</b>
+        <button class="g" style="padding:4px 10px;font-size:12px" onclick="addMixItem()">+ Add Spice</button>
+      </div>
+
+      <table class="mx-table">
+        <thead>
+          <tr>
+            <th style="width:40%">Spice Ingredient</th>
+            <th style="width:20%">Weight (g)</th>
+            <th style="width:25%">Cost / 100g (Rs)</th>
+            <th style="width:15%;text-align:right">Cost</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${mix.items.map((it,idx)=>{
+            const lineCost = ((+it.qty||0)/100) * (+it.unitPrice||0);
+            return `<tr>
+              <td>
+                <select style="width:100%;font-size:13px;padding:6px" onchange="updateMixSpice(${idx},this.value)">
+                  ${S.products.map(p=>`<option value="${p.name}" ${p.name===it.name?'selected':''}>${p.name}</option>`).join('')}
+                  ${!S.products.some(p=>p.name===it.name)?`<option value="${it.name}" selected>${it.name} (Custom)</option>`:''}
+                </select>
+              </td>
+              <td>
+                <input type="number" min="1" step="1" style="width:100%;padding:6px;text-align:center" value="${it.qty}" oninput="mix.items[${idx}].qty=+this.value||0;render()">
+              </td>
+              <td>
+                <input type="number" min="0" step="5" style="width:100%;padding:6px;text-align:right" value="${it.unitPrice}" oninput="mix.items[${idx}].unitPrice=+this.value||0;render()">
+              </td>
+              <td style="text-align:right;font-weight:700;font-size:13px">
+                ${LKR(lineCost)}
+              </td>
+              <td style="text-align:center">
+                <button class="g" style="padding:2px 7px;color:var(--bad);border:none" onclick="delMixItem(${idx})" title="Remove ingredient">✕</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+
+      <!-- Overheads: Packaging & Labor -->
+      <div style="margin-top:14px;padding:12px;background:var(--soft);border-radius:10px;border:1px solid var(--bd)">
+        <b style="font-size:13px;display:block;margin-bottom:8px">📦 Packaging & Processing Overheads</b>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11.5px;color:var(--mu);display:block;margin-bottom:4px">Packaging Pouch / Label Cost (Rs)</label>
+            <input type="number" min="0" style="width:100%;padding:6px;background:var(--card)" value="${mix.packCost}" oninput="mix.packCost=+this.value||0;render()">
+          </div>
+          <div>
+            <label style="font-size:11.5px;color:var(--mu);display:block;margin-bottom:4px">Grinding / Milling / Labor (Rs)</label>
+            <input type="number" min="0" style="width:100%;padding:6px;background:var(--card)" value="${mix.laborCost}" oninput="mix.laborCost=+this.value||0;render()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Real-Time Cost & Profit Breakdown -->
+    <div class="card" style="position:sticky;top:80px;align-self:start">
+      <h3 style="margin:0 0 12px">📊 Production Cost & Profit Meter</h3>
+
+      <div class="mx-metric-box">
+        <div class="mx-meter-row">
+          <span class="mu">Total Batch Weight:</span>
+          <b>${totG.toLocaleString()} g (${(totG/1000).toFixed(2)} kg)</b>
+        </div>
+        <div class="mx-meter-row">
+          <span class="mu">Packets Yielded (${mix.packUnit}):</span>
+          <b>${packCount.toFixed(1)} packs</b>
+        </div>
+        <div class="mx-meter-row">
+          <span class="mu">Raw Spices Cost:</span>
+          <span>${LKR(rawCost)}</span>
+        </div>
+        <div class="mx-meter-row">
+          <span class="mu">Overhead (Pack + Labor):</span>
+          <span>${LKR(mix.packCost + mix.laborCost)}</span>
+        </div>
+        <div class="mx-meter-row" style="padding-top:10px;font-size:15px">
+          <span style="font-weight:700">Total Batch Cost:</span>
+          <b style="color:var(--tx)">${LKR(totalCost)}</b>
+        </div>
+        <div class="mx-meter-row">
+          <span class="mu">Cost Per ${mix.packUnit} Packet:</span>
+          <b style="color:var(--ac);font-size:15px">${LKR(costPerPack)}</b>
+        </div>
+      </div>
+
+      <!-- Profit Margin Controls -->
+      <div style="margin:14px 0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <label style="font-size:12px;font-weight:700">Target Profit Margin %</label>
+          <b style="color:var(--ok);font-size:15px">${mix.marginPct}%</b>
+        </div>
+        <input type="range" min="5" max="150" step="1" value="${mix.marginPct}" style="width:100%;accent-color:var(--ok)" oninput="mix.marginPct=+this.value;mix.customPrice=0;render()">
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Selling Price per ${mix.packUnit} (Rs)</label>
+        <div class="row">
+          <input type="number" step="5" min="0" style="flex:1;padding:8px 10px;font-size:16px;font-weight:800;color:var(--tx)" value="${sellingPrice}" oninput="mix.customPrice=+this.value||0;render()">
+          ${mix.customPrice>0?`<button class="g" style="padding:4px 8px;font-size:11.5px" onclick="mix.customPrice=0;render()">Auto Margin</button>`:''}
+        </div>
+      </div>
+
+      <!-- Realized Profit Banner (කීයක් ලාභද?) -->
+      <div class="mx-profit-banner">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:700;color:var(--ok)">💰 Net Profit per Packet:</span>
+          <b style="font-size:18px;color:var(--ok)">+ ${LKR(profitPerPack)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px">
+          <span>Total Batch Profit:</span>
+          <b>+ ${LKR(totalBatchProfit)}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+          <span>Realized Profit Margin:</span>
+          <b style="background:var(--ok);color:#fff;padding:2px 8px;border-radius:6px">+${realMargin}%</b>
+        </div>
+        <div style="margin-top:10px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--ok) 35%,transparent);font-size:12px;line-height:1.4">
+          💡 මෙම මිශ්‍රණයේ පැකට් එකක් සඳහා වියදම <b>${LKR(costPerPack)}</b> කි. විකුණුම් මිල <b>${LKR(sellingPrice)}</b> ලෙස දැමූ විට <b>${LKR(profitPerPack)}</b> ක ලාභයක් ලැබේ!
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+        <button style="width:100%;padding:11px;font-size:14px" onclick="saveBlend()">💾 Save Recipe Formulation</button>
+        <button class="g" style="width:100%;padding:10px;font-size:13px;border-color:var(--ac2);color:var(--ac)" onclick="addBlendToProducts()">📦 Add to Products as Sellable Spice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saved Recipes & History Table -->
+  <div class="card" style="margin-top:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div>
+        <h3 style="margin:0">📚 Saved Spice Blend Formulations (${saved.length})</h3>
+        <span class="mu" style="font-size:12px">Reload past recipes, review ingredient costs, or reuse formulation formulas</span>
+      </div>
+    </div>
+
+    ${saved.length ? `
+      <div class="u-table-wrap">
+        <table class="u-table">
+          <thead>
+            <tr>
+              <th>Recipe Name</th>
+              <th>Batch Weight</th>
+              <th>Pack Unit</th>
+              <th>Total Cost</th>
+              <th>Selling Price</th>
+              <th>Profit Margin</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${saved.map(b=>`<tr>
+              <td>
+                <b>${b.name}</b>
+                <div class="mu" style="font-size:11.5px">${b.t ? new Date(b.t).toLocaleDateString() : ''} · ${(b.ingredients||[]).length} ingredients</div>
+              </td>
+              <td><b>${b.total_weight_g} g</b></td>
+              <td><span class="bdg" style="background:var(--soft);color:var(--tx);font-weight:600">${b.pack_unit||'100g'}</span></td>
+              <td>${LKR(b.total_cost)}</td>
+              <td style="color:var(--ac);font-weight:700">${LKR(b.selling_price)}</td>
+              <td>
+                <span style="color:var(--ok);font-weight:700">+${LKR(b.profit_amount)}</span>
+                <span class="mu" style="font-size:11px">(${Number(b.margin_pct).toFixed(0)}%)</span>
+              </td>
+              <td style="text-align:right">
+                <button class="g" style="padding:4px 9px;font-size:12px;margin-right:6px" onclick='loadSavedBlend(${JSON.stringify(b)})'>⚡ Load</button>
+                <button class="d" style="padding:4px 8px;font-size:12px" onclick="act('blend_del',{id:${b.id}})">🗑️</button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : `
+      <div class="mu" style="text-align:center;padding:24px 0">
+        No saved recipes yet. Formulate a blend above and click "Save Recipe Formulation" to store it here.
+      </div>
+    `}
+  </div>`;
+}
+
+// Authentic Thermal Receipt View
+function receipt(s){
+  modal(`<div id="rc-print-area">
+    <div class="rc-slip">
+      <div class="rc-store-title">🌶️ CEYLON SPICE HAVEN</div>
+      <div class="rc-sub">
+        Premium Spices & Natural Herbs<br>
+        No. 42, Galle Road, Colombo 03, Sri Lanka<br>
+        Tel: +94 11 234 5678 | Reg: PV-98241
+      </div>
+      <div class="rc-divider"></div>
+      <div class="rc-row"><span class="mu">Receipt No:</span><b>#${String(s.id).padStart(5,'0')}</b></div>
+      <div class="rc-row"><span class="mu">Date:</span><span>${new Date(s.t).toLocaleDateString()}</span></div>
+      <div class="rc-row"><span class="mu">Time:</span><span>${new Date(s.t).toLocaleTimeString()}</span></div>
+      <div class="rc-row"><span class="mu">Cashier:</span><span>${s.by||'Terminal'}</span></div>
+      ${s.cust?`<div class="rc-row"><span class="mu">Customer:</span><span>${s.cust}</span></div>`:''}
+      <div class="rc-divider"></div>
+      <table class="rc-table">
+        <thead>
+          <tr>
+            <th style="width:50%">ITEM</th>
+            <th style="text-align:center">QTY</th>
+            <th style="text-align:right">PRICE</th>
+            <th style="text-align:right">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${s.items.map(i=>`<tr>
+            <td>${i.name}</td>
+            <td style="text-align:center">${i.q}</td>
+            <td style="text-align:right">${(i.price).toFixed(2)}</td>
+            <td style="text-align:right">${(i.q*i.price).toFixed(2)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="rc-divider"></div>
+      <div class="rc-totals">
+        ${s.disc?`<div class="rc-row"><span>Discount</span><span>- ${LKR(s.disc)}</span></div>`:''}
+        <div class="rc-total-large">
+          <span>NET TOTAL</span>
+          <span>${LKR(s.total)}</span>
+        </div>
+        <div class="rc-row"><span>Payment (${s.pay})</span><span>${LKR(s.paid)}</span></div>
+        ${s.paid>s.total?`<div class="rc-row" style="font-weight:700"><span>CHANGE DUE</span><span>${LKR(s.paid-s.total)}</span></div>`:''}
+      </div>
+      <div class="rc-double"></div>
+      <div class="rc-barcode">||| | |||| || ||| || ||||| | ||</div>
+      <div style="text-align:center;font-size:10.5px;color:#444;margin-top:2px">INV-${String(s.id).padStart(6,'0')}</div>
+      <div style="text-align:center;margin-top:10px;font-size:11.5px">
+        Thank you for choosing Ceylon Spice Haven! 🙏<br>
+        <i>Visit again for the finest authentic flavors.</i>
+      </div>
+      <div class="rc-cut"></div>
+    </div>
+  </div>
+  <div class="row" style="justify-content:center;gap:10px">
+    <button onclick="window.print()" style="padding:10px 18px">🖨 Print Thermal Receipt</button>
+    <button class="g" onclick="close()" style="padding:10px 18px">New Sale / Done</button>
+  </div>`);
+}
+
+// Dashboard View
+function dash(){
+  const day=t=>new Date(t).toISOString().slice(0,10);
+  const td=day(Date.now()), yd=day(Date.now()-864e5);
+  const sum=d=>S.sales.filter(s=>day(s.t)==d).reduce((a,s)=>a+s.total,0);
+  const t=sum(td), y=sum(yd), ch=y?Math.round((t-y)/y*100):0;
+  const ds=[...Array(7)].map((_,i)=>{
+    const d=day(Date.now()-(6-i)*864e5);
+    return[d.slice(5),sum(d)];
+  });
+  const mx=Math.max(1,...ds.map(x=>x[1]));
+  const bars=ds.map((x,i)=>{
+    const h=x[1]/mx*110;
+    return `<rect x="${i*52+10}" y="${130-h}" width="34" height="${h}" rx="6" fill="var(--ac)" opacity=".9"/>
+    <text x="${i*52+27}" y="147" text-anchor="middle" font-size="10" fill="var(--mu)">${x[0]}</text>`;
+  }).join('');
+
+  const bs={};
+  S.sales.forEach(s=>bs[s.src]=(bs[s.src]||0)+s.total);
+  const tt=Object.values(bs).reduce((a,b)=>a+b,0)||1;
+  let off=0;
+  const arcs=Object.entries(bs).map(([k,v])=>{
+    const l=v/tt*251.3;
+    const e=`<circle r="40" cx="60" cy="60" fill="none" stroke="${CL[SRC.indexOf(k)%6]}" stroke-width="18" stroke-dasharray="${l} ${251.3-l}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)"/>`;
+    off+=l;
+    return e;
+  }).join('');
+
+  const tp={};
+  S.sales.forEach(s=>s.items.forEach(i=>tp[i.name]=(tp[i.name]||0)+i.q*i.price));
+  const top=Object.entries(tp).sort((a,b)=>b[1]-a[1]).slice(0,5), tm=top[0]?top[0][1]:1;
+  const tdS=S.sales.filter(s=>day(s.t)==td), val=S.products.reduce((a,p)=>a+p.stock*p.price,0);
+
+  return `<div class="row" style="align-items:stretch">
+    <div class="card kp">
+      <span class="mu">Today's Sales</span>
+      <b>${LKR(t)}</b>
+      <span class="${ch>=0?'up':'dn'}">${ch>=0?'▲':'▼'} ${Math.abs(ch)}% vs yesterday</span>
+    </div>
+    <div class="card kp">
+      <span class="mu">Today's Orders</span>
+      <b>${tdS.length}</b>
+      <span class="mu">${tdS.filter(s=>s.st=='pending').length} pending</span>
+    </div>
+    <div class="card kp">
+      <span class="mu">Low Stock Items</span>
+      <b class="${low().length?'dn':''}">${low().length}</b>
+      <span class="mu">5 units or fewer</span>
+    </div>
+    <div class="card kp">
+      <span class="mu">Inventory Value</span>
+      <b>${LKR(val)}</b>
+      <span class="mu">${S.products.length} products total</span>
+    </div>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>Sales Last 7 Days</h3>
+      <svg viewBox="0 0 370 155" width="100%">${bars}</svg>
+    </div>
+    <div class="card">
+      <h3>Revenue by Sales Channel</h3>
+      <div class="row">
+        <svg viewBox="0 0 120 120" width="120">${arcs}</svg>
+        <div style="flex:1;min-width:120px">
+          ${Object.entries(bs).map(([k,v])=>`<div class="row" style="margin:3px 0"><i class="dot" style="background:${CL[SRC.indexOf(k)%6]}"></i><span style="flex:1">${k}</span><b>${Math.round(v/tt*100)}%</b></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>Top Selling Spices</h3>
+      ${top.map(x=>`<div class="row" style="margin:6px 0"><span style="width:160px;overflow:hidden;text-overflow:ellipsis">${x[0]}</span><div class="bar" style="width:${x[1]/tm*45}%;min-width:6px"></div><b>${LKR(x[1])}</b></div>`).join('')||'<p class="mu">No sales yet.</p>'}
+    </div>
+    <div class="card">
+      <h3>Recent Terminal Transactions</h3>
+      ${S.sales.slice(0,6).map(s=>`<div class="row" style="margin:5px 0"><span style="flex:1">#${s.id} · ${s.src}</span><b>${LKR(s.total)}</b></div>`).join('')||'<p class="mu">No transactions.</p>'}
+    </div>
+  </div>`;
+}
+
+// Shortcuts
+addEventListener('keydown',e=>{
+  if(mode!='app')return;
+  if(e.key=='F2'){
+    e.preventDefault();
+    tab='pos';
+    render();
+    setTimeout(()=>{const i=$('#sc');i&&i.focus()},0);
+  }
+  if(e.key=='F9'&&tab=='pos'){
+    e.preventDefault();
+    checkout();
+  }
+  if(e.key=='Escape')close();
+});
+
+const _r=render;
+render=function(){
+  _r();
+  if(mode=='app'&&tab=='pos'&&!document.querySelector('#mdl')&&!/INPUT|SELECT/.test(document.activeElement.tagName)){
+    const i=$('#sc');i&&i.focus();
+  }
+};
+
+// API Sync & Actions
+function save(){}
+async function api(a,d){
+  try{
+    const r=await fetch('api.php?a='+a,{
+      method:d===undefined?'GET':'POST',
+      headers:{'Content-Type':'application/json','X-Requested-With':'fetch'},
+      body:d===undefined?undefined:JSON.stringify(d)
+    });
+    let j={};
+    try{j=await r.json()}catch(e){}
+    if(!r.ok){toast(j.error||'Server error '+r.status);return null;}
+    return j;
+  }catch(e){
+    toast('Cannot connect to server. Ensure Apache and MySQL are running in XAMPP.');
+    return null;
+  }
+}
+
+const norm=ps=>ps.map(p=>({
+  ...p,
+  cat:p.category||undefined,
+  img:p.image||img(p.emoji||'🌿',p.color||'#e3ecd0')
+}));
+
+async function sync(){
+  const j=await api('state');
+  if(!j)return false;
+  if(j.me){
+    me=j.me;
+    S={products:norm(j.products),roles:j.roles,users:j.users,sales:j.sales,blends:j.blends||[]};
+  } else {
+    const p=await api('public');
+    if(!p)return false;
+    me=null;
+    S={products:norm(p.products),roles:{},users:[],sales:[],blends:[]};
+  }
+  return true;
+}
+
+async function act(a,d){
+  const j=await api(a,d);
+  if(j){await sync();render();}
+  return j;
+}
+
+async function poll(){
+  if(mode=='login'||document.querySelector('#mdl')||/INPUT|SELECT/.test(document.activeElement.tagName))return;
+  if(await sync()){
+    if(!me&&mode=='app'){mode='login';}
+    render();
+  }
+}
+
+async function boot(){
+  if(!await sync()){
+    document.body.innerHTML='<div style="padding:32px;text-align:center"><h2>Server Not Reachable</h2><p>Please start <b>Apache</b> and <b>MySQL</b> in the XAMPP Control Panel, then reload http://localhost/spice-pos/</p></div>';
+    return;
+  }
+  if(me){
+    mode='app';
+    tab=can('analytics')?'dash':S.roles[me.r][0]||'pos';
+  } else {
+    mode='login';
+  }
+  render();
+  setInterval(poll,15000);
+}
+
+// Smooth single-step Login (no captcha requirement)
+async function login(){
+  const u=$('#lu')?.value.trim()||'';
+  const p=$('#lp')?.value||'';
+  if(!u||!p){toast('Please enter username and password');return;}
+  const j=await api('login',{u,p});
+  if(!j){return;}
+  await sync();
+  mode='app';
+  tab=can('analytics')?'dash':S.roles[me.r][0]||'pos';
+  render();
+  chime();
+  low().length&&toast('⚠ '+low().length+' products low on stock');
+  const st=await api('state');
+  st&&!st.sq&&toast('Please set your 3 security questions (🔐 Security)');
+}
+
+async function logout(){
+  await api('logout',{});
+  me=null;
+  cart=[];
+  mode='login';
+  await sync();
+  render();
+}
+
+function addP(){
+  const n=$('#pn').value.trim(), f=$('#pi').files[0];
+  if(!n||!$('#pp').value)return toast('Name and price are required');
+  const go=im=>act('product_add',{name:n,price:+$('#pp').value,unit:$('#pu').value||'unit',stock:+$('#ps').value||0,image:im});
+  if(f){
+    const r=new FileReader();
+    r.onload=()=>{
+      const i=new Image();
+      i.onload=()=>{
+        const c=document.createElement('canvas');
+        c.width=c.height=320;
+        c.getContext('2d').drawImage(i,0,0,320,320);
+        go(c.toDataURL('image/jpeg',.85));
+      };
+      i.src=r.result;
+    };
+    r.readAsDataURL(f);
+  } else {
+    go(null);
+  }
+}
+
+async function checkout(){
+  if(!cart.length)return;
+  const sub=cart.reduce((a,c)=>a+c.q*pr(c.id).price,0);
+  const tot=Math.max(0,sub-disc);
+  if(pay=='Cash'&&tend&&tend<tot)return toast('Cash received is less than net total');
+  const j=await api('sale',{
+    items:cart.map(c=>({id:c.id,q:c.q})),
+    src:$('#csrc').value,
+    cust:$('#ccu').value,
+    disc,
+    pay,
+    paid:pay=='Cash'&&tend?tend:tot
+  });
+  if(!j){await sync();render();return;}
+  chime();
+  cart=[];disc=0;tend=0;
+  await sync();
+  render();
+  j.sale.items.forEach(i=>{
+    const p=pr(i.id);
+    p&&p.stock<=5&&toast('⚠ Low stock: '+p.name+' ('+p.stock+' left)');
+  });
+  receipt(j.sale);
+}
+
+boot();
+</script>
+</body>
+</html>
