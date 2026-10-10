@@ -199,6 +199,22 @@ aside{
 .mx-profit-banner{border-radius:12px;padding:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--ok) 18%,var(--card)),color-mix(in srgb,var(--ok) 8%,var(--card)));border:1px solid var(--ok);margin-top:12px}
 .mx-template-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:600;background:var(--soft);border:1px solid var(--bd);cursor:pointer;margin-right:6px;margin-bottom:6px;transition:all .15s}
 .mx-template-btn:hover{background:var(--bd)}
+.mx-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:9px;margin-top:10px}
+.mx-cat-card{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:11px;background:var(--soft);border:1px solid var(--bd);cursor:pointer;text-align:left;transition:all .18s ease}
+.mx-cat-card:hover{background:var(--card);border-color:var(--ac);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,0.06)}
+.mx-cat-card.active{background:color-mix(in srgb,var(--ac) 14%,var(--card));border-color:var(--ac);box-shadow:0 2px 8px rgba(200,82,23,0.22)}
+.mx-cat-icon{font-size:24px;flex-shrink:0}
+.mx-cat-title{font-weight:700;font-size:12.5px;color:var(--tx);line-height:1.2}
+.mx-cat-sub{font-size:11px;color:var(--mu);margin-top:2px}
+.mx-scale-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0}
+.mx-scale-btn{padding:5px 11px;font-size:12px;font-weight:700;border-radius:8px;border:1px solid var(--bd);background:var(--card);cursor:pointer;color:var(--tx);transition:all .15s}
+.mx-scale-btn:hover{background:var(--soft);border-color:var(--ac)}
+.mx-badge-ok{background:#23783618;color:var(--ok);border:1px solid var(--ok);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;white-space:nowrap}
+.mx-badge-low{background:#cf132218;color:var(--bad);border:1px solid var(--bad);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;white-space:nowrap}
+.mx-stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px}
+.mx-stat-pill{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px;text-align:center}
+.mx-stat-pill-val{font-size:15px;font-weight:800;color:var(--tx);font-family:'JetBrains Mono',monospace}
+.mx-stat-pill-lbl{font-size:11px;color:var(--mu);margin-top:2px}
 
 section{flex:1;min-width:0;display:flex;flex-direction:column}
 .top{
@@ -614,7 +630,7 @@ function render(){
     ['dash','📊','Dashboard','analytics'],
     ['pos','🛒','POS Billing','pos'],
     ['products','📦','Products','products'],
-    ['mixer','🧪','Spice Mixer & Costing','products'],
+    ['mixer','🧪','Recipe & Cost Calculator','products'],
     ['orders','🧾','Orders','orders'],
     ['analytics','📈','Analytics','analytics'],
     ['users','👥','Users & Roles','users']
@@ -691,8 +707,19 @@ async function pwc(){
 }
 
 // POS Categories & Filter
-const CATS=['All','Powders','Seeds','Whole spices','Leaves & herbs','Other'];
-const catOf=p=>p.cat||(/powder/i.test(p.name)?'Powders':/seed|fenugreek/i.test(p.name)?'Seeds':/leaf|leaves|lemongrass|pandan/i.test(p.name)?'Leaves & herbs':/cinnamon|clove|cardamom|pepper|nutmeg|mace|anise|ginger|vanilla|saffron|goraka|tamarind/i.test(p.name)?'Whole spices':'Other');
+const CATS=['All','Powders','Seeds','Nuts & Seeds','Whole spices','Oils & Pastes','Leaves & herbs','Blends','Other'];
+const catOf=p=>{
+  if(p.category)return p.category;
+  const n=(p.name||'').toLowerCase();
+  if(/oil|polthel|paste|පේස්ට්|පොල්තෙල්/i.test(n))return 'Oils & Pastes';
+  if(/nut|walnut|pistachio|cashew|කජු|වොල්නට්|පිස්ටාචියෝ/i.test(n))return 'Nuts & Seeds';
+  if(/seed|fenugreek|chia|flax|flex|basil|pumpkin|ඇට/i.test(n))return 'Seeds';
+  if(/blend|masala|porridge|mix\(|මිශ්‍රණ/i.test(n))return 'Blends';
+  if(/powder|කුඩු|flakes/i.test(n))return 'Powders';
+  if(/leaf|leaves|lemongrass|pandan|කොළ/i.test(n))return 'Leaves & herbs';
+  if(/cinnamon|clove|cardamom|pepper|nutmeg|mace|anise|ginger|vanilla|saffron|goraka|tamarind|පොතු/i.test(n))return 'Whole spices';
+  return 'Other';
+};
 let cat='All', pay='Cash', disc=0, tend=0;
 const CL=['#c85217','#1877f2','#25d366','#111111','#e1306c','#8d6e63'];
 
@@ -1201,65 +1228,210 @@ function delU(u){confirm('Delete user '+u+'?')&&act('user_del',{u});}
 function addU(){act('user_add',{u:$('#nu').value.trim(),n:$('#nn').value,p:$('#np2').value,r:$('#nrr').value});}
 
 // Spice Mixer & Recipe Cost Calculator
+let activeMixIdx = 0;
 let mix = {
-  name: 'Special Roasted Curry Powder 500g',
+  name: 'Curry powder (තුනපහ කුඩු)',
   packUnit: '100g',
   packCost: 15,
   laborCost: 20,
   marginPct: 40,
   customPrice: 0,
   items: [
-    { name: 'Coriander Powder', qty: 200, unitPrice: 300 },
-    { name: 'Cumin Seeds', qty: 100, unitPrice: 520 },
-    { name: 'Fennel Seeds', qty: 80, unitPrice: 380 },
-    { name: 'Cinnamon (Ceylon)', qty: 40, unitPrice: 950 }
+    { name: 'Coriander Powder', qty: 500, unitPrice: 300, ratio: 50 },
+    { name: 'Cumin Seeds', qty: 250, unitPrice: 520, ratio: 25 },
+    { name: 'Fennel Seeds', qty: 150, unitPrice: 380, ratio: 15 },
+    { name: 'Turmeric Powder', qty: 60, unitPrice: 350, ratio: 6 },
+    { name: 'Curry Leaves', qty: 40, unitPrice: 100, ratio: 4 }
   ]
 };
 
 const MIX_TEMPLATES = [
   {
-    name: 'Traditional Raw Curry Powder (අමු තුනපහ)',
-    packUnit: '100g', packCost: 12, laborCost: 15, marginPct: 40,
+    name: 'Curry powder (තුනපහ කුඩු)',
+    sinhala: 'අමු තුනපහ කුඩු (සුවඳ කුළුබඩු මිශ්‍රණය)',
+    icon: '🍛',
+    packUnit: '100g', packCost: 15, laborCost: 20, marginPct: 40,
     items: [
-      { name: 'Coriander Powder', qty: 250, unitPrice: 300 },
-      { name: 'Cumin Seeds', qty: 100, unitPrice: 520 },
-      { name: 'Fennel Seeds', qty: 80, unitPrice: 380 },
-      { name: 'Turmeric Powder', qty: 50, unitPrice: 350 },
-      { name: 'Curry Leaves', qty: 30, unitPrice: 100 }
+      { name: 'Coriander Powder', qty: 500, unitPrice: 300, ratio: 50 },
+      { name: 'Cumin Seeds', qty: 250, unitPrice: 520, ratio: 25 },
+      { name: 'Fennel Seeds', qty: 150, unitPrice: 380, ratio: 15 },
+      { name: 'Turmeric Powder', qty: 60, unitPrice: 350, ratio: 6 },
+      { name: 'Curry Leaves', qty: 40, unitPrice: 100, ratio: 4 }
     ]
   },
   {
-    name: 'Special Roasted Curry Powder (බැදපු තුනපහ)',
+    name: 'Meat curry powder (මස් කරි කුඩු)',
+    sinhala: 'විශේෂ මස් කරි කුඩු (රස හා සුවඳැති)',
+    icon: '🥩',
     packUnit: '100g', packCost: 15, laborCost: 25, marginPct: 45,
     items: [
-      { name: 'Coriander Powder', qty: 200, unitPrice: 300 },
-      { name: 'Cumin Seeds', qty: 100, unitPrice: 520 },
-      { name: 'Fennel Seeds', qty: 60, unitPrice: 380 },
-      { name: 'Chilli Flakes', qty: 60, unitPrice: 480 },
-      { name: 'Cardamom', qty: 20, unitPrice: 2400 },
-      { name: 'Cinnamon (Ceylon)', qty: 30, unitPrice: 950 },
-      { name: 'Cloves', qty: 20, unitPrice: 1200 }
+      { name: 'Coriander Powder', qty: 380, unitPrice: 300, ratio: 38 },
+      { name: 'Chilli Powder', qty: 200, unitPrice: 420, ratio: 20 },
+      { name: 'Cumin Seeds', qty: 120, unitPrice: 520, ratio: 12 },
+      { name: 'Black Pepper', qty: 100, unitPrice: 700, ratio: 10 },
+      { name: 'Fennel Seeds', qty: 80, unitPrice: 380, ratio: 8 },
+      { name: 'Cinnamon sticks (කුරුඳු පොතු)', qty: 40, unitPrice: 980, ratio: 4 },
+      { name: 'Cardamom', qty: 30, unitPrice: 2400, ratio: 3 },
+      { name: 'Cloves', qty: 30, unitPrice: 1200, ratio: 3 },
+      { name: 'Dry Ginger', qty: 20, unitPrice: 650, ratio: 2 }
     ]
   },
   {
-    name: 'Spicy Chilli & Pepper Seasoning',
-    packUnit: '100g', packCost: 10, laborCost: 15, marginPct: 35,
+    name: 'Black pepper powder (ගම්මිරිස් කුඩු)',
+    sinhala: 'පිරිසිදු කළු ගම්මිරිස් කුඩු',
+    icon: '⚫',
+    packUnit: '100g', packCost: 14, laborCost: 20, marginPct: 35,
     items: [
-      { name: 'Chilli Powder', qty: 250, unitPrice: 420 },
-      { name: 'Black Pepper', qty: 150, unitPrice: 700 },
-      { name: 'Garlic Powder', qty: 50, unitPrice: 550 },
-      { name: 'Sea Salt', qty: 50, unitPrice: 120 }
+      { name: 'Black Pepper', qty: 950, unitPrice: 700, ratio: 95 },
+      { name: 'Dry Ginger', qty: 50, unitPrice: 650, ratio: 5 }
     ]
   },
   {
-    name: 'Ceylon Royal Chai Masala Blend',
-    packUnit: '50g', packCost: 20, laborCost: 30, marginPct: 50,
+    name: 'Turmeric powder (කහ කුඩු)',
+    sinhala: 'දේශීය අමු කහ කුඩු (Pure Ceylon)',
+    icon: '🟡',
+    packUnit: '100g', packCost: 14, laborCost: 18, marginPct: 35,
     items: [
-      { name: 'Cardamom', qty: 80, unitPrice: 2400 },
-      { name: 'Cinnamon (Ceylon)', qty: 80, unitPrice: 950 },
-      { name: 'Dry Ginger', qty: 60, unitPrice: 650 },
-      { name: 'Cloves', qty: 40, unitPrice: 1200 },
-      { name: 'Star Anise', qty: 20, unitPrice: 1100 }
+      { name: 'Turmeric Powder', qty: 1000, unitPrice: 350, ratio: 100 }
+    ]
+  },
+  {
+    name: 'Fenugreek (උළුහාල් කුඩු)',
+    sinhala: 'පිරිසිදු උළුහාල් කුඩු මිශ්‍රණය',
+    icon: '🫘',
+    packUnit: '100g', packCost: 14, laborCost: 18, marginPct: 35,
+    items: [
+      { name: 'Fenugreek', qty: 850, unitPrice: 250, ratio: 85 },
+      { name: 'Cumin Seeds', qty: 150, unitPrice: 520, ratio: 15 }
+    ]
+  },
+  {
+    name: 'Biriyani masala (බිරියානි මසාලා)',
+    sinhala: 'රාජකීය බිරියානි මසාලා මිශ්‍රණය',
+    icon: '🍚',
+    packUnit: '100g', packCost: 18, laborCost: 30, marginPct: 50,
+    items: [
+      { name: 'Coriander Powder', qty: 240, unitPrice: 300, ratio: 24 },
+      { name: 'Cumin Seeds', qty: 180, unitPrice: 520, ratio: 18 },
+      { name: 'Fennel Seeds', qty: 140, unitPrice: 380, ratio: 14 },
+      { name: 'Cardamom', qty: 100, unitPrice: 2400, ratio: 10 },
+      { name: 'Cinnamon sticks (කුරුඳු පොතු)', qty: 100, unitPrice: 980, ratio: 10 },
+      { name: 'Cloves', qty: 80, unitPrice: 1200, ratio: 8 },
+      { name: 'Star Anise', qty: 60, unitPrice: 2200, ratio: 6 },
+      { name: 'Bay Leaves', qty: 50, unitPrice: 400, ratio: 5 },
+      { name: 'Nutmeg', qty: 50, unitPrice: 1500, ratio: 5 }
+    ]
+  },
+  {
+    name: 'Garam masala (ගරම් මසාලා)',
+    sinhala: 'සුවඳැති ගරම් මසාලා කුඩු',
+    icon: '🥘',
+    packUnit: '100g', packCost: 18, laborCost: 30, marginPct: 45,
+    items: [
+      { name: 'Coriander Powder', qty: 280, unitPrice: 300, ratio: 28 },
+      { name: 'Cumin Seeds', qty: 220, unitPrice: 520, ratio: 22 },
+      { name: 'Black Pepper', qty: 160, unitPrice: 700, ratio: 16 },
+      { name: 'Cardamom', qty: 110, unitPrice: 2400, ratio: 11 },
+      { name: 'Cinnamon sticks (කුරුඳු පොතු)', qty: 110, unitPrice: 980, ratio: 11 },
+      { name: 'Cloves', qty: 70, unitPrice: 1200, ratio: 7 },
+      { name: 'Nutmeg', qty: 50, unitPrice: 1500, ratio: 5 }
+    ]
+  },
+  {
+    name: 'Chai masala (චායි මසාලා)',
+    sinhala: 'සුවඳවත් තේ කුළුබඩු මිශ්‍රණය',
+    icon: '☕',
+    packUnit: '50g', packCost: 20, laborCost: 35, marginPct: 50,
+    items: [
+      { name: 'Cardamom', qty: 350, unitPrice: 2400, ratio: 35 },
+      { name: 'Cinnamon sticks (කුරුඳු පොතු)', qty: 300, unitPrice: 980, ratio: 30 },
+      { name: 'Dry Ginger', qty: 200, unitPrice: 650, ratio: 20 },
+      { name: 'Cloves', qty: 100, unitPrice: 1200, ratio: 10 },
+      { name: 'Star Anise', qty: 50, unitPrice: 2200, ratio: 5 }
+    ]
+  },
+  {
+    name: 'Black curry powder (කළු කරි කුඩු)',
+    sinhala: 'බැදපු කළු තුනපහ කුඩු',
+    icon: '🍳',
+    packUnit: '100g', packCost: 16, laborCost: 25, marginPct: 45,
+    items: [
+      { name: 'Coriander Powder', qty: 420, unitPrice: 300, ratio: 42 },
+      { name: 'Cumin Seeds', qty: 200, unitPrice: 520, ratio: 20 },
+      { name: 'Fennel Seeds', qty: 140, unitPrice: 380, ratio: 14 },
+      { name: 'Black Pepper', qty: 80, unitPrice: 700, ratio: 8 },
+      { name: 'Cinnamon sticks (කුරුඳු පොතු)', qty: 50, unitPrice: 980, ratio: 5 },
+      { name: 'Cardamom', qty: 30, unitPrice: 2400, ratio: 3 },
+      { name: 'Cloves', qty: 30, unitPrice: 1200, ratio: 3 },
+      { name: 'Curry Leaves', qty: 50, unitPrice: 100, ratio: 5 }
+    ]
+  },
+  {
+    name: 'Serial porridge (ධාන්‍ය කැඳ)',
+    sinhala: 'පෝෂ්‍යදායී දේශීය ධාන්‍ය කැඳ මිශ්‍රණය',
+    icon: '🥣',
+    packUnit: '200g', packCost: 15, laborCost: 20, marginPct: 40,
+    items: [
+      { name: 'Red Rice Flour (රතු කැකුළු)', qty: 300, unitPrice: 70, ratio: 30 },
+      { name: 'Green Gram Powder (මුං ඇට)', qty: 250, unitPrice: 90, ratio: 25 },
+      { name: 'Soya Bean Powder (සෝයා)', qty: 150, unitPrice: 80, ratio: 15 },
+      { name: 'Chickpea Flour (කඩල)', qty: 150, unitPrice: 85, ratio: 15 },
+      { name: 'Garlic Powder', qty: 50, unitPrice: 550, ratio: 5 },
+      { name: 'Dry Ginger', qty: 50, unitPrice: 650, ratio: 5 },
+      { name: 'Sea Salt', qty: 50, unitPrice: 24, ratio: 5 }
+    ]
+  },
+  {
+    name: 'Serial mix(golden grains) (ධාන්‍ය මිශ්‍රණය)',
+    sinhala: 'රන්වන් ධාන්‍ය මිශ්‍රණය (Golden Grains)',
+    icon: '🌾',
+    packUnit: '250g', packCost: 18, laborCost: 22, marginPct: 45,
+    items: [
+      { name: 'Corn Grains (බඩඉරිඟු)', qty: 250, unitPrice: 75, ratio: 25 },
+      { name: 'Green Gram (මුං ඇට)', qty: 250, unitPrice: 90, ratio: 25 },
+      { name: 'Soya Grains (සෝයා)', qty: 200, unitPrice: 80, ratio: 20 },
+      { name: 'Kurakkan & Rice Grains (කුරක්කන්)', qty: 150, unitPrice: 85, ratio: 15 },
+      { name: 'Cashew nuts (කජු)', qty: 100, unitPrice: 1400, ratio: 10 },
+      { name: 'Cardamom', qty: 30, unitPrice: 2400, ratio: 3 },
+      { name: 'Cinnamon sticks (කුරුඳු පොතු)', qty: 20, unitPrice: 980, ratio: 2 }
+    ]
+  },
+  {
+    name: 'Chilli powder (මිරිස් කුඩු)',
+    sinhala: '100% වියළි මිරිස් කුඩු',
+    icon: '🌶️',
+    packUnit: '100g', packCost: 14, laborCost: 18, marginPct: 35,
+    items: [
+      { name: 'Chilli Powder', qty: 1000, unitPrice: 420, ratio: 100 }
+    ]
+  },
+  {
+    name: 'Crushed chilli (කෑලි මිරිස්)',
+    sinhala: 'විශේෂ බැදපු කෑලි මිරිස්',
+    icon: '🔥',
+    packUnit: '100g', packCost: 14, laborCost: 16, marginPct: 35,
+    items: [
+      { name: 'Chilli Flakes', qty: 970, unitPrice: 480, ratio: 97 },
+      { name: 'Sea Salt', qty: 30, unitPrice: 24, ratio: 3 }
+    ]
+  },
+  {
+    name: 'Ginger powder (ඉඟුරු කුඩු)',
+    sinhala: 'පිරිසිදු වේලූ ඉඟුරු කුඩු',
+    icon: '🫚',
+    packUnit: '100g', packCost: 15, laborCost: 20, marginPct: 40,
+    items: [
+      { name: 'Dry Ginger', qty: 1000, unitPrice: 650, ratio: 100 }
+    ]
+  },
+  {
+    name: 'Mastard Powder (අබ කුඩු)',
+    sinhala: 'සුවඳැති අබ කුඩු මිශ්‍රණය',
+    icon: '🟠',
+    packUnit: '100g', packCost: 14, laborCost: 18, marginPct: 40,
+    items: [
+      { name: 'Mustard Seeds', qty: 900, unitPrice: 230, ratio: 90 },
+      { name: 'Turmeric Powder', qty: 100, unitPrice: 350, ratio: 10 }
     ]
   }
 ];
@@ -1267,20 +1439,42 @@ const MIX_TEMPLATES = [
 function loadMixTemplate(idx){
   const t = MIX_TEMPLATES[idx];
   if(!t) return;
+  activeMixIdx = idx;
   mix = JSON.parse(JSON.stringify(t));
   mix.customPrice = 0;
+  // Auto-sync ingredient unit prices with live shop inventory
+  mix.items.forEach(it => {
+    const p = S.products.find(x => x.name.toLowerCase() === it.name.toLowerCase());
+    if(p) it.unitPrice = p.price;
+  });
   render();
-  toast('Loaded formula template: ' + t.name);
+  toast('Loaded formula: ' + t.name);
+}
+
+function scaleBatch(targetG){
+  const currentTotal = mix.items.reduce((sum, item) => sum + (+item.qty || 0), 0);
+  if(currentTotal <= 0) return;
+  const factor = targetG / currentTotal;
+  mix.items.forEach(it => {
+    it.qty = Math.max(1, Math.round(it.qty * factor));
+  });
+  render();
+  toast('Scaled recipe to ' + (targetG >= 1000 ? (targetG/1000).toFixed(1) + ' kg' : targetG + ' g') + ' batch');
+}
+
+function scalePacks(count){
+  const packG = parseInt(mix.packUnit) || 100;
+  scaleBatch(count * packG);
 }
 
 function addMixItem(){
   const first = S.products[0] || { name: 'Raw Spice', price: 400 };
-  mix.items.push({ name: first.name, qty: 50, unitPrice: first.price });
+  mix.items.push({ name: first.name, qty: 50, unitPrice: first.price, ratio: 0 });
   render();
 }
 
 function delMixItem(idx){
-  if(mix.items.length <= 1) return toast('Recipe must have at least one spice ingredient');
+  if(mix.items.length <= 1) return toast('Recipe must have at least one ingredient');
   mix.items.splice(idx, 1);
   render();
 }
@@ -1335,11 +1529,38 @@ async function addBlendToProducts(){
     image: null
   });
   if(res){
+    chime();
     toast('✓ ' + mix.name + ' added to Products inventory at ' + LKR(sp) + ' (' + estStock + ' packs)!');
   }
 }
 
+async function executeBatchProduction(){
+  const tw = mix.items.reduce((a,c)=>a + (+c.qty||0), 0);
+  if(tw <= 0) return toast('Please specify ingredient quantities');
+  const packG = parseInt(mix.packUnit) || 100;
+  const packCount = Math.max(1, Math.floor(tw / packG));
+  const raw = mix.items.reduce((a,c)=>a + ((+c.qty||0)/100) * (+c.unitPrice||0), 0);
+  const tc = raw + (+mix.packCost||0) + (+mix.laborCost||0);
+  const cpu = tw > 0 ? (tc / tw) * packG : 0;
+  const sp = Math.round(mix.customPrice > 0 ? mix.customPrice : cpu * (1 + (mix.marginPct||0)/100));
+
+  if(!confirm(`Produce ${packCount} packets of "${mix.name}"?\n\nThis will deduct the required raw ingredients from stock and add ${packCount} finished units to inventory at ${LKR(sp)}.`)) return;
+
+  const res = await act('batch_produce', {
+    name: mix.name.trim(),
+    yield_packs: packCount,
+    pack_unit: mix.packUnit,
+    selling_price: sp,
+    ingredients: mix.items
+  });
+  if(res && res.ok){
+    chime();
+    toast(`🎉 Batch completed: Added ${packCount} units of ${mix.name} to stock & deducted ingredients!`);
+  }
+}
+
 function loadSavedBlend(b){
+  activeMixIdx = -1;
   mix = {
     name: b.name,
     packUnit: b.pack_unit || '100g',
@@ -1363,82 +1584,149 @@ function mixer(){
   const packCount = totG > 0 ? (totG / packG) : 0;
   const costPerPack = packCount > 0 ? (totalCost / packCount) : 0;
   const costPer100g = totG > 0 ? (totalCost / totG) * 100 : 0;
+  const costPer1kg = costPer100g * 10;
 
   const sellingPrice = mix.customPrice > 0 ? mix.customPrice : Math.round(costPerPack * (1 + (mix.marginPct||0)/100));
   const profitPerPack = Math.max(0, sellingPrice - costPerPack);
   const totalBatchRevenue = packCount * sellingPrice;
   const totalBatchProfit = Math.max(0, totalBatchRevenue - totalCost);
-  const realMargin = costPerPack > 0 ? ((profitPerPack / costPerPack) * 100).toFixed(1) : 0;
+  const realMargin = sellingPrice > 0 ? ((profitPerPack / sellingPrice) * 100).toFixed(1) : 0;
+  const markupPct = costPerPack > 0 ? (((sellingPrice - costPerPack) / costPerPack) * 100).toFixed(1) : 0;
+  const breakevenPrice = costPerPack;
+
+  const isProfitable = sellingPrice > costPerPack;
+  const profitRating = !isProfitable ? '🔴 Loss' : realMargin >= 40 ? '🟢 Highly Profitable' : realMargin >= 20 ? '🟡 Healthy Profit' : '🟠 Low Margin';
 
   const saved = S.blends || [];
 
   return `
-  <!-- Header & Preset Templates -->
+  <!-- Header & 15 Preset Formulation Catalog -->
   <div class="card" style="margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
       <div>
-        <h3 style="margin:0 0 4px">🧪 Spice Blending & Production Cost Calculator</h3>
-        <span class="mu" style="font-size:13px">Combine individual spices, calculate raw goods costs, batch weights, packaging overhead, selling price, and view exact profits!</span>
+        <h3 style="margin:0 0 4px">🧪 Recipe Production, Raw Material & Profit Credentials Calculator</h3>
+        <span class="mu" style="font-size:13px">නිෂ්පාදනයක් සඳහා අවශ්‍ය අමුද්‍රව්‍ය ප්‍රමාණය, සම්පූර්ණ වියදම (Cost) සහ ලැබෙන ලාභය (Profit & Margin) නිවැරදිව මැන බැලීම</span>
       </div>
-      <div>
+      <div style="display:flex;gap:8px">
+        <button class="g" onclick="window.print()" title="Print Recipe Cost Sheet">🖨️ Print Sheet</button>
         <button class="g" onclick="mix.items=[];addMixItem();render()">Reset Form</button>
       </div>
     </div>
-    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--bd)">
-      <span class="mu" style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">⚡ QUICK RECIPE FORMULATION TEMPLATES:</span>
-      ${MIX_TEMPLATES.map((t,i)=>`<button type="button" class="mx-template-btn" onclick="loadMixTemplate(${i})">✨ ${t.name}</button>`).join('')}
+
+    <!-- 15 Products Selection Grid -->
+    <div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--bd)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span class="mu" style="font-size:12px;font-weight:700">⚡ තෝරාගත හැකි නිෂ්පාදන වට්ටෝරු 15 (SELECT FORMULATION):</span>
+        <span class="mu" style="font-size:11.5px">Click any product to load authentic recipe</span>
+      </div>
+      <div class="mx-cat-grid">
+        ${MIX_TEMPLATES.map((t,i)=>{
+          const isActive = activeMixIdx === i;
+          return `<div class="mx-cat-card ${isActive?'active':''}" onclick="loadMixTemplate(${i})">
+            <span class="mx-cat-icon">${t.icon}</span>
+            <div>
+              <div class="mx-cat-title">${t.name}</div>
+              <div class="mx-cat-sub">${t.sinhala}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>
   </div>
 
   <div class="mx-grid">
     <!-- Left Column: Formulation & Ingredients List -->
     <div class="card">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
         <div style="flex:2;min-width:200px">
           <label style="font-size:12px;font-weight:700;color:var(--mu);display:block;margin-bottom:4px">Recipe / Mixture Name</label>
-          <input id="mx-name" value="${mix.name}" style="width:100%;font-weight:700;font-size:14px" oninput="mix.name=this.value" placeholder="e.g. Special Roasted Curry Powder 500g">
+          <input id="mx-name" value="${mix.name}" style="width:100%;font-weight:700;font-size:14px" oninput="mix.name=this.value" placeholder="e.g. Curry powder 500g">
         </div>
-        <div style="width:120px">
-          <label style="font-size:12px;font-weight:700;color:var(--mu);display:block;margin-bottom:4px">Packet Unit</label>
-          <select style="width:100%;padding:8px" onchange="mix.packUnit=this.value;render()">
+        <div style="width:130px">
+          <label style="font-size:12px;font-weight:700;color:var(--mu);display:block;margin-bottom:4px">Packet Unit Size</label>
+          <select style="width:100%;padding:8px;font-weight:600" onchange="mix.packUnit=this.value;render()">
             ${['50g','100g','200g','250g','500g','1kg'].map(u=>`<option ${mix.packUnit===u?'selected':''}>${u}</option>`).join('')}
           </select>
         </div>
       </div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 6px">
-        <b>🌿 Ingredients & Weight Breakdown</b>
-        <button class="g" style="padding:4px 10px;font-size:12px" onclick="addMixItem()">+ Add Spice</button>
+      <!-- Batch Scaling Bar -->
+      <div style="background:var(--soft);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+          <span style="font-size:12px;font-weight:700">⚖️ Scale Batch (කාණ්ඩයේ ප්‍රමාණය වෙනස් කරන්න):</span>
+          <span class="mu" style="font-size:11px">Auto-adjusts all raw ingredients proportionally</span>
+        </div>
+        <div class="mx-scale-bar">
+          <span class="mu" style="font-size:11.5px">By Weight:</span>
+          <button type="button" class="mx-scale-btn" onclick="scaleBatch(500)">500g</button>
+          <button type="button" class="mx-scale-btn" onclick="scaleBatch(1000)">1 kg</button>
+          <button type="button" class="mx-scale-btn" onclick="scaleBatch(2000)">2 kg</button>
+          <button type="button" class="mx-scale-btn" onclick="scaleBatch(5000)">5 kg</button>
+          <button type="button" class="mx-scale-btn" onclick="scaleBatch(10000)">10 kg</button>
+          <button type="button" class="mx-scale-btn" onclick="scaleBatch(25000)">25 kg</button>
+          <span style="width:1px;height:18px;background:var(--bd);margin:0 4px"></span>
+          <span class="mu" style="font-size:11.5px">By Packs:</span>
+          <button type="button" class="mx-scale-btn" onclick="scalePacks(10)">10 Packs</button>
+          <button type="button" class="mx-scale-btn" onclick="scalePacks(25)">25 Packs</button>
+          <button type="button" class="mx-scale-btn" onclick="scalePacks(50)">50 Packs</button>
+          <button type="button" class="mx-scale-btn" onclick="scalePacks(100)">100 Packs</button>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
+        <div>
+          <b>🌿 Raw Materials Measurement (අවශ්‍ය අමුද්‍රව්‍ය ප්‍රමාණය)</b>
+          <span class="mu" style="font-size:11.5px;display:block">Ingredient quantity needed and live stock check</span>
+        </div>
+        <button class="g" style="padding:4px 10px;font-size:12px" onclick="addMixItem()">+ Add Ingredient</button>
       </div>
 
       <table class="mx-table">
         <thead>
           <tr>
-            <th style="width:40%">Spice Ingredient</th>
-            <th style="width:20%">Weight (g)</th>
-            <th style="width:25%">Cost / 100g (Rs)</th>
-            <th style="width:15%;text-align:right">Cost</th>
+            <th style="width:34%">Spice / Raw Material</th>
+            <th style="width:16%">Weight (g / kg)</th>
+            <th style="width:18%">Cost/100g (Rs)</th>
+            <th style="width:14%;text-align:right">Subtotal</th>
+            <th style="width:18%;text-align:center">Stock Status</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           ${mix.items.map((it,idx)=>{
             const lineCost = ((+it.qty||0)/100) * (+it.unitPrice||0);
+            const ratioPct = totG > 0 ? (((+it.qty||0)/totG)*100).toFixed(1) : 0;
+            const p = S.products.find(x => x.name.toLowerCase() === it.name.toLowerCase() || x.name.toLowerCase().includes(it.name.toLowerCase()));
+            const inStockPacks = p ? p.stock : null;
+            const unitG = p ? (preg_match_unit = parseInt(p.unit)||100) : 100;
+            const inStockG = inStockPacks !== null ? inStockPacks * unitG : null;
+            const isOk = inStockG !== null && inStockG >= (+it.qty||0);
+            const shortageG = inStockG !== null ? Math.max(0, (+it.qty||0) - inStockG) : 0;
+
             return `<tr>
               <td>
-                <select style="width:100%;font-size:13px;padding:6px" onchange="updateMixSpice(${idx},this.value)">
-                  ${S.products.map(p=>`<option value="${p.name}" ${p.name===it.name?'selected':''}>${p.name}</option>`).join('')}
-                  ${!S.products.some(p=>p.name===it.name)?`<option value="${it.name}" selected>${it.name} (Custom)</option>`:''}
+                <select style="width:100%;font-size:13px;padding:6px;font-weight:600" onchange="updateMixSpice(${idx},this.value)">
+                  ${S.products.map(pr=>`<option value="${pr.name}" ${pr.name===it.name?'selected':''}>${pr.name}</option>`).join('')}
+                  ${!S.products.some(pr=>pr.name===it.name)?`<option value="${it.name}" selected>${it.name} (Custom)</option>`:''}
                 </select>
+                <span class="mu" style="font-size:10.5px;display:block;margin-top:2px">Ratio: ${ratioPct}% of batch</span>
               </td>
               <td>
-                <input type="number" min="1" step="1" style="width:100%;padding:6px;text-align:center" value="${it.qty}" oninput="mix.items[${idx}].qty=+this.value||0;render()">
+                <input type="number" min="1" step="1" style="width:100%;padding:6px;text-align:center;font-weight:700" value="${it.qty}" oninput="mix.items[${idx}].qty=+this.value||0;render()">
+                <span class="mu" style="font-size:10.5px;display:block;text-align:center">${it.qty >= 1000 ? (it.qty/1000).toFixed(2)+' kg' : it.qty+' g'}</span>
               </td>
               <td>
                 <input type="number" min="0" step="5" style="width:100%;padding:6px;text-align:right" value="${it.unitPrice}" oninput="mix.items[${idx}].unitPrice=+this.value||0;render()">
               </td>
               <td style="text-align:right;font-weight:700;font-size:13px">
                 ${LKR(lineCost)}
+              </td>
+              <td style="text-align:center">
+                ${inStockPacks !== null ? `
+                  <span class="${isOk?'mx-badge-ok':'mx-badge-low'}" title="${isOk?'Stock has '+inStockG+'g':'Need '+shortageG+'g more'}">
+                    ${isOk ? '✅ Available' : '⚠️ Short: '+shortageG+'g'}
+                  </span>
+                ` : `<span class="mu" style="font-size:11px">Custom</span>`}
               </td>
               <td style="text-align:center">
                 <button class="g" style="padding:2px 7px;color:var(--bad);border:none" onclick="delMixItem(${idx})" title="Remove ingredient">✕</button>
@@ -1448,92 +1736,119 @@ function mixer(){
         </tbody>
       </table>
 
-      <!-- Overheads: Packaging & Labor -->
+      <!-- Overheads: Packaging, Milling & Labor -->
       <div style="margin-top:14px;padding:12px;background:var(--soft);border-radius:10px;border:1px solid var(--bd)">
-        <b style="font-size:13px;display:block;margin-bottom:8px">📦 Packaging & Processing Overheads</b>
+        <b style="font-size:13px;display:block;margin-bottom:8px">📦 Processing & Packaging Overheads (අතිරේක වියදම්)</b>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div>
-            <label style="font-size:11.5px;color:var(--mu);display:block;margin-bottom:4px">Packaging Pouch / Label Cost (Rs)</label>
+            <label style="font-size:11.5px;color:var(--mu);display:block;margin-bottom:4px">Packaging Pouch, Foil & Labels (Rs)</label>
             <input type="number" min="0" style="width:100%;padding:6px;background:var(--card)" value="${mix.packCost}" oninput="mix.packCost=+this.value||0;render()">
           </div>
           <div>
-            <label style="font-size:11.5px;color:var(--mu);display:block;margin-bottom:4px">Grinding / Milling / Labor (Rs)</label>
+            <label style="font-size:11.5px;color:var(--mu);display:block;margin-bottom:4px">Grinding, Roasting & Labor (Rs)</label>
             <input type="number" min="0" style="width:100%;padding:6px;background:var(--card)" value="${mix.laborCost}" oninput="mix.laborCost=+this.value||0;render()">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Live Real-Time Cost & Profit Breakdown -->
+    <!-- Right Column: Live Real-Time Cost & Profit Credentials Dashboard -->
     <div class="card" style="position:sticky;top:80px;align-self:start">
-      <h3 style="margin:0 0 12px">📊 Production Cost & Profit Meter</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0">📊 Cost & Profit Credentials</h3>
+        <span class="bdg" style="background:${isProfitable?'var(--ok)':'var(--bad)'}">${profitRating}</span>
+      </div>
+
+      <!-- Quick KPI Pill Row -->
+      <div class="mx-stat-row">
+        <div class="mx-stat-pill">
+          <div class="mx-stat-pill-val">${totG >= 1000 ? (totG/1000).toFixed(2)+' kg' : totG+' g'}</div>
+          <div class="mx-stat-pill-lbl">Batch Weight</div>
+        </div>
+        <div class="mx-stat-pill">
+          <div class="mx-stat-pill-val">${packCount.toFixed(1)}</div>
+          <div class="mx-stat-pill-lbl">Yield Packs</div>
+        </div>
+        <div class="mx-stat-pill">
+          <div class="mx-stat-pill-val" style="color:var(--ac)">${LKR(costPerPack)}</div>
+          <div class="mx-stat-pill-lbl">Cost / Pack</div>
+        </div>
+      </div>
 
       <div class="mx-metric-box">
         <div class="mx-meter-row">
-          <span class="mu">Total Batch Weight:</span>
-          <b>${totG.toLocaleString()} g (${(totG/1000).toFixed(2)} kg)</b>
+          <span class="mu">Raw Ingredients Cost (අමුද්‍රව්‍ය):</span>
+          <b>${LKR(rawCost)}</b>
         </div>
         <div class="mx-meter-row">
-          <span class="mu">Packets Yielded (${mix.packUnit}):</span>
-          <b>${packCount.toFixed(1)} packs</b>
-        </div>
-        <div class="mx-meter-row">
-          <span class="mu">Raw Spices Cost:</span>
-          <span>${LKR(rawCost)}</span>
-        </div>
-        <div class="mx-meter-row">
-          <span class="mu">Overhead (Pack + Labor):</span>
+          <span class="mu">Overheads (Packaging + Labor):</span>
           <span>${LKR(mix.packCost + mix.laborCost)}</span>
         </div>
-        <div class="mx-meter-row" style="padding-top:10px;font-size:15px">
-          <span style="font-weight:700">Total Batch Cost:</span>
+        <div class="mx-meter-row" style="padding-top:8px;font-size:14px">
+          <span style="font-weight:700">Total Batch Cost (සම්පූර්ණ වියදම):</span>
           <b style="color:var(--tx)">${LKR(totalCost)}</b>
         </div>
         <div class="mx-meter-row">
-          <span class="mu">Cost Per ${mix.packUnit} Packet:</span>
-          <b style="color:var(--ac);font-size:15px">${LKR(costPerPack)}</b>
+          <span class="mu">Cost per 100g / 1kg:</span>
+          <span>${LKR(costPer100g)} / ${LKR(costPer1kg)}</span>
+        </div>
+        <div class="mx-meter-row" style="background:var(--card);padding:8px 10px;border-radius:8px;margin-top:6px">
+          <span style="font-weight:700;color:var(--ac)">Production Cost per ${mix.packUnit} Packet:</span>
+          <b style="color:var(--ac);font-size:16px">${LKR(costPerPack)}</b>
         </div>
       </div>
 
       <!-- Profit Margin Controls -->
       <div style="margin:14px 0">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <label style="font-size:12px;font-weight:700">Target Profit Margin %</label>
+          <label style="font-size:12px;font-weight:700">Target Profit Margin % (ලාභ ප්‍රතිශතය)</label>
           <b style="color:var(--ok);font-size:15px">${mix.marginPct}%</b>
         </div>
         <input type="range" min="5" max="150" step="1" value="${mix.marginPct}" style="width:100%;accent-color:var(--ok)" oninput="mix.marginPct=+this.value;mix.customPrice=0;render()">
       </div>
 
       <div style="margin-bottom:12px">
-        <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Selling Price per ${mix.packUnit} (Rs)</label>
+        <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Selling Price per ${mix.packUnit} Packet (විකුණුම් මිල)</label>
         <div class="row">
           <input type="number" step="5" min="0" style="flex:1;padding:8px 10px;font-size:16px;font-weight:800;color:var(--tx)" value="${sellingPrice}" oninput="mix.customPrice=+this.value||0;render()">
           ${mix.customPrice>0?`<button class="g" style="padding:4px 8px;font-size:11.5px" onclick="mix.customPrice=0;render()">Auto Margin</button>`:''}
         </div>
+        <div class="mu" style="font-size:11.5px;margin-top:2px">Breakeven min price: ${LKR(breakevenPrice)}</div>
       </div>
 
       <!-- Realized Profit Banner (කීයක් ලාභද?) -->
       <div class="mx-profit-banner">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-weight:700;color:var(--ok)">💰 Net Profit per Packet:</span>
+          <span style="font-weight:700;color:var(--ok)">💰 Net Profit per Packet (පැකට් 1ක ලාභය):</span>
           <b style="font-size:18px;color:var(--ok)">+ ${LKR(profitPerPack)}</b>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px">
-          <span>Total Batch Profit:</span>
+          <span>Total Batch Net Profit (කාණ්ඩයේ ශුද්ධ ලාභය):</span>
           <b>+ ${LKR(totalBatchProfit)}</b>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-          <span>Realized Profit Margin:</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px">
+          <span>Profit Margin on Selling Price:</span>
           <b style="background:var(--ok);color:#fff;padding:2px 8px;border-radius:6px">+${realMargin}%</b>
         </div>
-        <div style="margin-top:10px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--ok) 35%,transparent);font-size:12px;line-height:1.4">
-          💡 මෙම මිශ්‍රණයේ පැකට් එකක් සඳහා වියදම <b>${LKR(costPerPack)}</b> කි. විකුණුම් මිල <b>${LKR(sellingPrice)}</b> ලෙස දැමූ විට <b>${LKR(profitPerPack)}</b> ක ලාභයක් ලැබේ!
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mu)">
+          <span>Markup on Production Cost:</span>
+          <b>+${markupPct}%</b>
+        </div>
+        <div style="margin-top:10px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--ok) 35%,transparent);font-size:12px;line-height:1.45">
+          💡 මෙම මිශ්‍රණයේ <b>${mix.packUnit}</b> පැකට් එකක් නිපදවීමට රු. <b>${costPerPack.toFixed(2)}</b> ක් වැයවන අතර, රු. <b>${sellingPrice.toFixed(2)}</b> ට විකුණන විට පැකට් එකකින් රු. <b>${profitPerPack.toFixed(2)}</b> ක ලාභයක් (+${realMargin}%) සහ <b>${packCount.toFixed(0)}</b> ක සම්පූර්ණ නිෂ්පාදනයෙන් රු. <b>${totalBatchProfit.toFixed(2)}</b> ක ශුද්ධ ලාභයක් ලැබේ!
         </div>
       </div>
 
       <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
-        <button style="width:100%;padding:11px;font-size:14px" onclick="saveBlend()">💾 Save Recipe Formulation</button>
-        <button class="g" style="width:100%;padding:10px;font-size:13px;border-color:var(--ac2);color:var(--ac)" onclick="addBlendToProducts()">📦 Add to Products as Sellable Spice</button>
+        <button style="width:100%;padding:11px;font-size:14px;background:linear-gradient(135deg,var(--ac),var(--ac2))" onclick="executeBatchProduction()">
+          🏭 Produce Batch & Deduct Raw Stock
+        </button>
+        <button class="g" style="width:100%;padding:10px;font-size:13px" onclick="saveBlend()">
+          💾 Save Recipe Formulation
+        </button>
+        <button class="g" style="width:100%;padding:10px;font-size:13px;border-color:var(--ac2);color:var(--ac)" onclick="addBlendToProducts()">
+          📦 Add to Products as Sellable Spice
+        </button>
       </div>
     </div>
   </div>

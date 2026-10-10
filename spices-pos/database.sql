@@ -40,4 +40,15 @@ INSERT IGNORE INTO products(id,code,name,price,unit,stock,image,emoji,color) VAL
 (27,'SP027','Maldive Fish',1800,'100g',14,'assets/img/maldive-fish.jpg','🐟','#d9e8c3'),
 (28,'SP028','Coconut Milk Powder',320,'300g',44,'assets/img/coconut-milk.jpg','🥥','#f6e3a1'),
 (29,'SP029','Sea Salt',120,'500g',80,'assets/img/sea-salt.jpg','🧂','#e8cdb3'),
-(30,'SP030','Vanilla Pods',1900,'10pcs',11,'assets/img/vanilla.jpg','🍦','#f2b8a8');
+(30,'SP030','Vanilla Pods',1900,'10pcs',11,'assets/img/vanilla.jpg','🍦','#f2b8a8'),
+(31,'SP031','Cinnamon sticks (කුරුඳු පොතු)',980,'100g',35,'assets/img/cinnamon-sticks.jpg','🪵','#f7d9b5'),
+(32,'SP032','Garcinia paste (ගොරකා පේස්ට්)',750,'200g',25,'assets/img/garcinia-paste.jpg','🫙','#3a271d'),
+(33,'SP033','Derana polthel (දෙරණ පොල්තෙල්)',850,'375ml',40,'assets/img/derana-polthel.jpg','🥥','#f6e3a1'),
+(34,'SP034','Walnut (වොල්නට්)',1650,'100g',20,'assets/img/walnut.jpg','🥜','#e8cdb3'),
+(35,'SP035','Pistachio (පිස්ටාචියෝ)',1850,'100g',18,'assets/img/pistachio.jpg','🫘','#d9e8c3'),
+(36,'SP036','Pumpkin seeds (වට්ටක්කා ඇට)',620,'100g',30,'assets/img/pumpkin-seeds.jpg','🎃','#d9e8c3'),
+(37,'SP037','Chia seeds (චියා ඇට)',580,'100g',35,'assets/img/chia-seeds.jpg','🌱','#e8cdb3'),
+(38,'SP038','Cashew nuts (කජු)',1400,'100g',45,'assets/img/cashew-nuts.jpg','🥜','#f7d9b5'),
+(39,'SP039','Flex seeds (හණ ඇට)',420,'100g',28,'assets/img/flex-seeds.jpg','🌾','#f3c6a5'),
+(40,'SP040','Basil seeds (කසකසා ඇට)',390,'100g',32,'assets/img/basil-seeds.jpg','⚫','#e8cdb3');
+

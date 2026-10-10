@@ -1299,10 +1299,20 @@ const DEMO_PRODUCTS = [
   { id: 27, name: "Seedless Tamarind Pulp", price: 280, unit: "250g", stock: 38, cat: "Whole Spices", img: "images/products/tamarind.jpg" },
   { id: 28, name: "Maldive Fish Chips (Smoked)", price: 1800, unit: "100g", stock: 14, cat: "Blends", img: "images/products/maldive-fish.jpg" },
   { id: 29, name: "Coconut Milk Powder", price: 320, unit: "300g", stock: 44, cat: "Powders", img: "images/products/coconut-milk.jpg" },
-  { id: 30, name: "Pure Sea Salt Flakes", price: 120, unit: "500g", stock: 80, cat: "Whole Spices", img: "images/products/sea-salt.jpg" }
+  { id: 30, name: "Pure Sea Salt Flakes", price: 120, unit: "500g", stock: 80, cat: "Whole Spices", img: "images/products/sea-salt.jpg" },
+  { id: 31, name: "Cinnamon sticks (කුරුඳු පොතු)", price: 980, unit: "100g", stock: 35, cat: "Whole Spices", img: "images/products/cinnamon-sticks.jpg" },
+  { id: 32, name: "Garcinia paste (ගොරකා පේස්ට්)", price: 750, unit: "200g", stock: 25, cat: "Oils & Pastes", img: "images/products/garcinia-paste.jpg" },
+  { id: 33, name: "Derana polthel (දෙරණ පොල්තෙල්)", price: 850, unit: "375ml", stock: 40, cat: "Oils & Pastes", img: "images/products/derana-polthel.jpg" },
+  { id: 34, name: "Walnut (වොල්නට්)", price: 1650, unit: "100g", stock: 20, cat: "Nuts & Seeds", img: "images/products/walnut.jpg" },
+  { id: 35, name: "Pistachio (පිස්ටාචියෝ)", price: 1850, unit: "100g", stock: 18, cat: "Nuts & Seeds", img: "images/products/pistachio.jpg" },
+  { id: 36, name: "Pumpkin seeds (වට්ටක්කා ඇට)", price: 620, unit: "100g", stock: 30, cat: "Seeds", img: "images/products/pumpkin-seeds.jpg" },
+  { id: 37, name: "Chia seeds (චියා ඇට)", price: 580, unit: "100g", stock: 35, cat: "Seeds", img: "images/products/chia-seeds.jpg" },
+  { id: 38, name: "Cashew nuts (කජු)", price: 1400, unit: "100g", stock: 45, cat: "Nuts & Seeds", img: "images/products/cashew-nuts.jpg" },
+  { id: 39, name: "Flex seeds (හණ ඇට)", price: 420, unit: "100g", stock: 28, cat: "Seeds", img: "images/products/flex-seeds.jpg" },
+  { id: 40, name: "Basil seeds (කසකසා ඇට)", price: 390, unit: "100g", stock: 32, cat: "Seeds", img: "images/products/basil-seeds.jpg" }
 ];
 
-const CATEGORIES = ['All', 'Whole Spices', 'Powders', 'Seeds', 'Leaves & Herbs', 'Blends'];
+const CATEGORIES = ['All', 'Whole Spices', 'Powders', 'Seeds', 'Nuts & Seeds', 'Leaves & Herbs', 'Blends', 'Oils & Pastes'];
 
 let products = [];
 let cart = {};
@@ -1374,10 +1384,11 @@ async function initStore() {
     if (!data.products || !data.products.length) throw new Error();
 
     products = data.products.map(p => {
-      // Find matching image or fallback
-      const demoMatch = DEMO_PRODUCTS.find(d => d.name.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(d.name.toLowerCase()));
-      const imgPath = p.image || (demoMatch ? demoMatch.img : 'images/products/cinnamon.jpg');
-      const cat = p.category || (demoMatch ? demoMatch.cat : 'Whole Spices');
+      // Find matching demo product or fallback
+      const demoMatch = DEMO_PRODUCTS.find(d => d.id == p.id || d.name.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(d.name.toLowerCase()));
+      const rawImg = p.image || (demoMatch ? demoMatch.img : 'images/products/cinnamon.jpg');
+      const imgPath = rawImg.replace(/^assets\/img\//, 'images/products/');
+      const cat = (demoMatch ? demoMatch.cat : null) || p.category || 'Whole Spices';
       return {
         id: p.id,
         name: p.name,

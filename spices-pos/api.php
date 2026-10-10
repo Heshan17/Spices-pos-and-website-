@@ -152,5 +152,38 @@ case 'blend_del':
   $id=(int)($in['id']??0);
   q("DELETE FROM spice_blends WHERE id=?",'i',$id);
   out(['ok'=>1]);
+case 'batch_produce':
+  $m=need('products');
+  $n=trim((string)($in['name']??''));
+  if($n==='')fail('Product / blend name required');
+  $yieldPacks=max(1,(int)($in['yield_packs']??1));
+  $packUnit=mb_substr(trim((string)($in['pack_unit']??'100g'))?:'100g',0,20);
+  $price=(float)($in['selling_price']??0);
+  $ings=$in['ingredients']??[];
+  if(!is_array($ings)||!$ings)fail('Ingredients list required');
+
+  $db->begin_transaction();
+  foreach($ings as $ing){
+    $ingName=trim((string)($ing['name']??''));
+    $neededG=max(0,(float)($ing['qty']??0));
+    if($neededG<=0)continue;
+    $row=q("SELECT id,stock,unit FROM products WHERE name=? AND active=1",'s',$ingName);
+    if($row){
+      $pid=(int)$row[0]['id'];
+      $unitG=preg_match('/(\d+)\s*g/i',$row[0]['unit'],$mg)?(float)$mg[1]:(preg_match('/(\d+)\s*kg/i',$row[0]['unit'],$mk)?(float)$mk[1]*1000:100);
+      $packsToDeduct=max(1,(int)round($neededG / max(1,$unitG)));
+      q("UPDATE products SET stock=GREATEST(0, stock - ?) WHERE id=?",'ii',$packsToDeduct,$pid);
+    }
+  }
+  $exist=q("SELECT id,stock FROM products WHERE name=? AND active=1",'s',$n);
+  if($exist){
+    q("UPDATE products SET stock=stock+?, price=IF(? > 0, ?, price), unit=? WHERE id=?",'idisi',$yieldPacks,$price,$price,$packUnit,(int)$exist[0]['id']);
+  } else {
+    q("INSERT INTO products(name,price,unit,stock,category) VALUES(?,?,?,?,?)",'sdsis',$n,max(10,$price),$packUnit,$yieldPacks,'Blends');
+    $nid=$db->insert_id;
+    q("UPDATE products SET code=? WHERE id=?",'si',sprintf('SP%03d',$nid),$nid);
+  }
+  $db->commit();
+  out(['ok'=>1,'yield'=>$yieldPacks]);
 default: fail('Unknown action',404);
 }
